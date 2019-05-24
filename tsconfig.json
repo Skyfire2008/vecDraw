@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "outFile": "bin/vecDraw.js"
+    },
+    "compileOnSave": true,
+    "include": [
+        "src/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
