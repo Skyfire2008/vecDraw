@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "outFile": "bin/vecDraw.js"
+        "outDir": "bin"
     },
     "compileOnSave": true,
     "include": [
