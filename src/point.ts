@@ -1,4 +1,4 @@
-export class Point {
+class Point {
     public x: number;
     public y: number;
     public color: string;

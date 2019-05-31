@@ -1,6 +1,8 @@
 {
     "compilerOptions": {
-        "outDir": "bin"
+        "outFile": "bin/vecDraw.js",
+        "target": "es6",
+        "module": "none"
     },
     "compileOnSave": true,
     "include": [

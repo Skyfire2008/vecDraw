@@ -1,6 +1,4 @@
-import { Point } from "./point";
-
-export class Line {
+class Line {
     private from: Point;
     private to: Point;
 }
