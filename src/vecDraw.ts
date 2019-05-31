@@ -1,5 +1,14 @@
-$("#pointTemplate").draggable(
-    {}
-);
+enum Mode {
+    addPoint,
+    connectPoint
+}
 
-console.log("hello world!");
+document.addEventListener("DOMContentLoaded", () => {
+    $("#pointTemplate").draggable();
+
+    console.log("hello world!");
+});
+
+document.addEventListener("keyup", (e: KeyboardEvent) => {
+
+});
