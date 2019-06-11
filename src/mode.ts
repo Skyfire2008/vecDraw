@@ -6,33 +6,39 @@ interface Mode {
     onMouseUp(e: MouseEvent): void;
 }
 
-class AddPointMode implements Mode {
+abstract class AbstractMode implements Mode {
 
-    private pointTemplate: HTMLElement;
-    private pointHolder: HTMLElement;
+    protected owner: VecDraw;
+
+    constructor(vecDraw: VecDraw) {
+        this.owner = vecDraw;
+    }
+
+    abstract onEnable(): void;
+    abstract onDisable(): void;
+    abstract onMouseMove(e: MouseEvent): void;
+    abstract onMouseDown(e: MouseEvent): void;
+    abstract onMouseUp(e: MouseEvent): void;
+}
+
+class AddPointMode extends AbstractMode {
+
     private pointNum: number;
 
-    constructor(pointTemplate: HTMLElement, pointHolder: HTMLElement) {
-        this.pointNum = 0;
-        this.pointHolder = pointHolder;
-        this.pointTemplate = pointTemplate;
+    constructor(vecDraw: VecDraw) {
+        super(vecDraw);
     }
 
-    onEnable(): void {
-        //empty
-    }
+    onEnable(): void { }
 
     onDisable(): void { }
 
     onMouseMove(e: MouseEvent): void {
-        this.pointTemplate.setAttribute("style", `left: ${e.x - 10}; top: ${e.y - 10}`);
+        this.owner.moveTemplatePoint(e.x, e.y);
     }
 
     onMouseUp(e: MouseEvent): void {
-        const clone = <HTMLElement>this.pointTemplate.cloneNode(true);
-        clone.setAttribute("id", `point${this.pointNum}`);
-        this.pointNum++;
-        this.pointHolder.appendChild(clone);
+        this.owner.addPoint();
     }
 
     onMouseDown(e: MouseEvent): void { }

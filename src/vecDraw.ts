@@ -1,29 +1,29 @@
-var currentMode: Mode;
+class VecDraw {
+    private templatePoint: ModelPoint;
+    private pointHolder: HTMLElement;
 
-var xMouse = 0;
-var yMouse = 0;
+    private points: Array<ModelPoint>;
+    private currentColor: string;
 
-document.addEventListener("DOMContentLoaded", () => {
+    constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement) {
+        this.points = [];
+        this.currentColor = "white";
+        this.pointHolder = pointHolder;
+        this.templatePoint = new ModelPoint(0, 0, this.currentColor, pointTemplateElem);
+    }
 
-    const pointTemplate = document.getElementById("pointTemplate");
-    const pointHolder = document.getElementById("pointHolder");
+    public moveTemplatePoint(x: number, y: number) {
+        this.templatePoint.x = x;
+        this.templatePoint.y = y;
+    }
 
-    currentMode = new AddPointMode(pointTemplate, pointHolder);
-
-    console.log("hello world!");
-});
-
-document.addEventListener("keyup", (e: KeyboardEvent) => {
-    console.log(e.key);
-});
-
-document.addEventListener("mousemove", (e: MouseEvent) => {
-    currentMode.onMouseMove(e);
-});
-
-document.addEventListener("mouseup", (e: MouseEvent) => {
-    currentMode.onMouseUp(e);
-});
+    public addPoint() {
+        const clone = <HTMLElement>this.templatePoint.elem.cloneNode(true);
+        clone.removeAttribute("id");
+        this.pointHolder.appendChild(clone);
+        this.points.push(new ModelPoint(this.templatePoint.x, this.templatePoint.y, this.currentColor, clone));
+    }
+}
 
 class ModelPoint {
     private point: Point;
@@ -56,25 +56,5 @@ class ModelPoint {
     set y(y: number) {
         this.point.y = y;
         this.resetElemPos();
-    }
-}
-
-class VecDraw {
-    private templatePoint: ModelPoint;
-    private pointHolder: HTMLElement;
-
-    private points: Array<ModelPoint>;
-    private currentColor: string;
-
-    public moveTemplatePoint(x: number, y: number) {
-        this.templatePoint.x = x;
-        this.templatePoint.y = y;
-    }
-
-    public addPoint() {
-        const clone = <HTMLElement>this.templatePoint.elem.cloneNode(true);
-        clone.removeAttribute("id");
-        this.pointHolder.appendChild(clone);
-        this.points.push(new ModelPoint(this.templatePoint.x, this.templatePoint.y, this.currentColor, clone));
     }
 }
