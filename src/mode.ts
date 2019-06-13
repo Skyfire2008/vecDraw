@@ -21,6 +21,38 @@ abstract class AbstractMode implements Mode {
 	abstract onMouseUp(e: MouseEvent): void;
 }
 
+class ConnectPointsMode extends AbstractMode {
+
+	private from: ModelPoint;
+	private to: ModelPoint;
+	private tempCtx: CanvasRenderingContext2D;
+
+	constructor(vecDraw: VecDraw, tempCtx: CanvasRenderingContext2D) {
+		super(vecDraw);
+		this.from = null;
+		this.to = null;
+		this.tempCtx = tempCtx;
+	}
+
+	onEnable(): void { }
+	onDisable(): void { }
+	onMouseMove(e: MouseEvent): void {
+		if (this.from !== null) {
+			this.tempCtx.clearRect(0, 0, 800, 600);
+			this.tempCtx.beginPath();
+			this.tempCtx.moveTo(this.from.x, this.from.y);
+			this.tempCtx.lineTo(e.x, e.y);
+			this.tempCtx.closePath();
+		}
+	}
+	onMouseDown(e: MouseEvent): void {
+		this.from = this.owner.pointAt(e.x, e.y);
+	}
+	onMouseUp(e: MouseEvent): void {
+		throw new Error("Method not implemented.");
+	}
+}
+
 class DummyMode implements Mode {
 	onEnable(): void { }
 	onDisable(): void { }

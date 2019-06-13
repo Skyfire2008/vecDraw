@@ -8,10 +8,15 @@ document.addEventListener("DOMContentLoaded", () => {
 	const pointTemplate = document.getElementById("pointTemplate");
 	const pointHolder = document.getElementById("pointHolder");
 
+	const mainCanvas = <HTMLCanvasElement>document.getElementById("mainCanvas");
+	const tempCanvas = <HTMLCanvasElement>document.getElementById("tempCanvas");
+	const mainRect = mainCanvas.getBoundingClientRect();
+
 	vecDraw = new VecDraw(pointTemplate, pointHolder);
 	modes = new Map();
 	modes.set("a", new AddPointMode(vecDraw));
 	modes.set("m", new MovePointMode(vecDraw));
+	modes.set("c", new ConnectPointsMode(vecDraw, tempCanvas.getContext("2d")));
 	currentMode = new DummyMode();
 });
 
