@@ -1,4 +1,4 @@
 class Line {
-    private from: Point;
-    private to: Point;
+	private from: Point;
+	private to: Point;
 }
