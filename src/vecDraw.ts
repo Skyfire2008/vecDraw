@@ -20,10 +20,30 @@ class VecDraw {
 		this.canvasTop = canvasTop;
 	}
 
+	private redrawLines() {
+		this.mainCtx.clearRect(0, 0, 800, 600);
+		for (const line of this.lines.values()) {
+			//const from = this.points.get(line.from.id);
+			//const to = this.points.get(line.to.id);
+
+			const startPos = new Point(line.from.x - this.canvasLeft, line.from.y - this.canvasTop);
+			const endPos = new Point(line.to.x - this.canvasLeft, line.to.y - this.canvasTop);
+
+			const grad = this.mainCtx.createLinearGradient(startPos.x, startPos.y, endPos.x, endPos.y);
+			grad.addColorStop(0, line.from.color);
+			grad.addColorStop(1, line.to.color);
+			this.mainCtx.strokeStyle = grad;
+
+			this.mainCtx.beginPath();
+			this.mainCtx.moveTo(line.from.x - this.canvasLeft, line.from.y - this.canvasTop);
+			this.mainCtx.lineTo(line.to.x - this.canvasLeft, line.to.y - this.canvasTop);
+			this.mainCtx.stroke();
+		}
+	}
+
 	public moveTemplatePoint(x: number, y: number) {
 		this.templatePoint.x = x;
 		this.templatePoint.y = y;
-		//TODO: update the canvas
 	}
 
 	public addPoint() {
@@ -42,9 +62,18 @@ class VecDraw {
 			const line = new ModelLine(from, to);
 			this.lines.set(line.id, line);
 
+			//TODO: add a function to draw a single line
+			const startPos = new Point(line.from.x - this.canvasLeft, line.from.y - this.canvasTop);
+			const endPos = new Point(line.to.x - this.canvasLeft, line.to.y - this.canvasTop);
+
+			const grad = this.mainCtx.createLinearGradient(startPos.x, startPos.y, endPos.x, endPos.y);
+			grad.addColorStop(0, line.from.color);
+			grad.addColorStop(1, line.to.color);
+			this.mainCtx.strokeStyle = grad;
+
 			this.mainCtx.beginPath();
-			this.mainCtx.moveTo(from.x - this.canvasLeft, from.y - this.canvasTop);
-			this.mainCtx.lineTo(to.x - this.canvasLeft, to.y - this.canvasTop);
+			this.mainCtx.moveTo(line.from.x - this.canvasLeft, line.from.y - this.canvasTop);
+			this.mainCtx.lineTo(line.to.x - this.canvasLeft, line.to.y - this.canvasTop);
 			this.mainCtx.stroke();
 		} else {
 			throw `Either ${fromId} or ${toId} is an invalid point ID`;
@@ -67,12 +96,13 @@ class VecDraw {
 	public movePoint(id: number, x: number, y: number): void {
 		this.points.get(id).x = x;
 		this.points.get(id).y = y;
+		this.redrawLines();
 	}
 }
 
 class ModelLine {
-	private from: ModelPoint;
-	private to: ModelPoint;
+	readonly from: ModelPoint;
+	readonly to: ModelPoint;
 	readonly id: string;
 
 	public static makeId(fromId: number, toId: number): string {
@@ -80,7 +110,7 @@ class ModelLine {
 		if (toId < fromId) {
 			let temp = fromId;
 			fromId = toId;
-			toId = fromId;
+			toId = temp;
 		}
 
 		return `${fromId}->${toId}`;
@@ -90,7 +120,7 @@ class ModelLine {
 		if (to.id < from.id) {
 			let temp = from;
 			from = to;
-			to = from;
+			to = temp;
 		}
 
 		this.from = from;
@@ -108,14 +138,21 @@ class ModelPoint {
 
 	private point: Point;
 	private connections: Array<ModelPoint>;
-	private color: string;
+	readonly color: string;
 	readonly id: number;
 	readonly elem: HTMLElement;
 
 	constructor(x: number, y: number, color: string, elem: HTMLElement) {
 		this.point = new Point(x, y);
 		this.connections = [];
-		this.color = color;
+
+		//TODO: purely for testing, remove me
+		//this.color = color;
+		const r = Math.floor(Math.random() * 256);
+		const g = Math.floor(Math.random() * 256);
+		const b = Math.floor(Math.random() * 256);
+		this.color = "#" + r.toString(16) + g.toString(16) + b.toString(16);
+
 		this.id = ModelPoint.count++;
 		this.elem = elem;
 		this.resetElemPos();

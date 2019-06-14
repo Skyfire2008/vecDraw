@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	const mainCanvas = <HTMLCanvasElement>document.getElementById("mainCanvas");
 	const mainRect = mainCanvas.getBoundingClientRect();
+	const mainCtx = mainCanvas.getContext("2d");
+	mainCtx.lineWidth = 2;
 
 	const tempCanvas = <HTMLCanvasElement>document.getElementById("tempCanvas");
 	tempCanvas.setAttribute("style", `left: ${mainRect.left}px; top: ${mainRect.top}px`);
@@ -17,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	tempCtx.lineWidth = 2;
 	tempCtx.strokeStyle = "white";
 
-	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCanvas.getContext("2d"), mainRect.left, mainRect.top);
+	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCtx, mainRect.left, mainRect.top);
 	modes = new Map();
 	modes.set("a", new AddPointMode(vecDraw));
 	modes.set("m", new MovePointMode(vecDraw));
