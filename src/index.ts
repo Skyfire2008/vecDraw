@@ -9,14 +9,19 @@ document.addEventListener("DOMContentLoaded", () => {
 	const pointHolder = document.getElementById("pointHolder");
 
 	const mainCanvas = <HTMLCanvasElement>document.getElementById("mainCanvas");
-	const tempCanvas = <HTMLCanvasElement>document.getElementById("tempCanvas");
 	const mainRect = mainCanvas.getBoundingClientRect();
 
-	vecDraw = new VecDraw(pointTemplate, pointHolder);
+	const tempCanvas = <HTMLCanvasElement>document.getElementById("tempCanvas");
+	tempCanvas.setAttribute("style", `left: ${mainRect.left}px; top: ${mainRect.top}px`);
+	const tempCtx = tempCanvas.getContext("2d");
+	tempCtx.lineWidth = 2;
+	tempCtx.strokeStyle = "white";
+
+	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCanvas.getContext("2d"), mainRect.left, mainRect.top);
 	modes = new Map();
 	modes.set("a", new AddPointMode(vecDraw));
 	modes.set("m", new MovePointMode(vecDraw));
-	modes.set("c", new ConnectPointsMode(vecDraw, tempCanvas.getContext("2d")));
+	modes.set("c", new ConnectPointsMode(vecDraw, tempCtx, mainRect.left, mainRect.top));
 	currentMode = new DummyMode();
 });
 

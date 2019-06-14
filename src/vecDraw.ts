@@ -1,22 +1,29 @@
 class VecDraw {
 	private templatePoint: ModelPoint;
 	private pointHolder: HTMLElement;
+	private mainCtx: CanvasRenderingContext2D;
+	private canvasLeft: number;
+	private canvasTop: number;
 
 	private points: Map<number, ModelPoint>;
 	private lines: Map<string, ModelLine>;
-	private currentColor: string;
+	readonly currentColor: string;
 
-	constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement) {
+	constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement, mainCtx: CanvasRenderingContext2D, canvasLeft: number, canvasTop: number) {
 		this.points = new Map();
 		this.lines = new Map();
 		this.currentColor = "white";
 		this.pointHolder = pointHolder;
 		this.templatePoint = new ModelPoint(0, 0, this.currentColor, pointTemplateElem);
+		this.mainCtx = mainCtx;
+		this.canvasLeft = canvasLeft;
+		this.canvasTop = canvasTop;
 	}
 
 	public moveTemplatePoint(x: number, y: number) {
 		this.templatePoint.x = x;
 		this.templatePoint.y = y;
+		//TODO: update the canvas
 	}
 
 	public addPoint() {
@@ -28,13 +35,27 @@ class VecDraw {
 		//this.points.push(new ModelPoint(this.templatePoint.x, this.templatePoint.y, this.currentColor, clone));
 	}
 
+	public addLine(fromId: number, toId: number) {
+		let to = this.points.get(toId);
+		let from = this.points.get(fromId);
+		if (to !== undefined && from !== undefined) {
+			const line = new ModelLine(from, to);
+			this.lines.set(line.id, line);
+
+			this.mainCtx.beginPath();
+			this.mainCtx.moveTo(from.x - this.canvasLeft, from.y - this.canvasTop);
+			this.mainCtx.lineTo(to.x - this.canvasLeft, to.y - this.canvasTop);
+			this.mainCtx.stroke();
+		} else {
+			throw `Either ${fromId} or ${toId} is an invalid point ID`;
+		}
+	}
+
 	public pointAt(x: number, y: number): ModelPoint {
 		let result: ModelPoint = null;
 
 		for (const point of this.points.values()) {
-			let dx = point.x - x;
-			let dy = point.y - y;
-			if (dx * dx + dy * dy <= 100) {
+			if (point.containsPoint(x, y)) {
 				result = point;
 				break;
 			}
@@ -43,9 +64,9 @@ class VecDraw {
 		return result;
 	}
 
-	public movePoint(ind: number, x: number, y: number): void {
-		this.points.get(ind).x = x;
-		this.points.get(ind).y = y;
+	public movePoint(id: number, x: number, y: number): void {
+		this.points.get(id).x = x;
+		this.points.get(id).y = y;
 	}
 }
 
@@ -66,20 +87,30 @@ class ModelLine {
 	}
 
 	constructor(from: ModelPoint, to: ModelPoint) {
+		if (to.id < from.id) {
+			let temp = from;
+			from = to;
+			to = from;
+		}
+
 		this.from = from;
 		this.to = to;
+		//TODO: eliminate double swap of to and from
 		this.id = ModelLine.makeId(from.id, to.id);
 	}
 }
 
 class ModelPoint {
+
+	static readonly radius = 10;
+	static readonly radius2 = ModelPoint.radius * ModelPoint.radius;
+	private static count: number = -1;
+
 	private point: Point;
 	private connections: Array<ModelPoint>;
 	private color: string;
 	readonly id: number;
 	readonly elem: HTMLElement;
-
-	private static count: number = -1;
 
 	constructor(x: number, y: number, color: string, elem: HTMLElement) {
 		this.point = new Point(x, y);
@@ -88,6 +119,12 @@ class ModelPoint {
 		this.id = ModelPoint.count++;
 		this.elem = elem;
 		this.resetElemPos();
+	}
+
+	public containsPoint(x: number, y: number): boolean {
+		let dx = this.x - x;
+		let dy = this.y - y;
+		return dx * dx + dy * dy < ModelPoint.radius2;
 	}
 
 	public connectTo(other: ModelPoint) {
