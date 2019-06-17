@@ -21,6 +21,87 @@ abstract class AbstractMode implements Mode {
 	abstract onMouseUp(e: MouseEvent): void;
 }
 
+class AddConnectedPointMode extends AbstractMode {
+	private prevPoint: ModelPoint;
+	private tempCtx: CanvasRenderingContext2D;
+	private canvasLeft: number;
+	private canvasTop: number;
+
+	constructor(vecDraw: VecDraw, tempCtx: CanvasRenderingContext2D, canvasLeft: number, canvasTop: number) {
+		super(vecDraw);
+		this.prevPoint = null;
+		this.tempCtx = tempCtx;
+		this.canvasLeft = canvasLeft;
+		this.canvasTop = canvasTop;
+	}
+
+	onEnable(): void { }
+	onDisable(): void {
+		this.prevPoint = null;
+		this.tempCtx.clearRect(0, 0, 800, 600);
+		this.owner.resetTemplatePoint();
+	}
+
+	onMouseMove(e: MouseEvent): void {
+		this.owner.moveTemplatePoint(e.x, e.y);
+		if (this.prevPoint !== null) {
+			this.tempCtx.clearRect(0, 0, 800, 600);
+			this.tempCtx.beginPath();
+			this.tempCtx.moveTo(this.prevPoint.x - this.canvasLeft, this.prevPoint.y - this.canvasTop);
+			this.tempCtx.lineTo(e.x - this.canvasLeft, e.y - this.canvasTop);
+			this.tempCtx.stroke();
+		}
+	}
+
+	onMouseUp(e: MouseEvent): void {
+		const newPoint = this.owner.addPoint();
+		if (this.prevPoint !== null) {
+			this.owner.addLine(this.prevPoint.id, newPoint.id);
+		}
+
+		this.prevPoint = newPoint;
+	}
+
+	onMouseDown(e: MouseEvent): void {
+		const foo = this.owner.pointAt(e.x, e.y);
+		if (foo !== null) {
+			this.prevPoint = foo;
+			this.owner.setCurrentColor(this.prevPoint.color);
+		}
+	}
+}
+
+class PointColorMode extends AbstractMode {
+
+	private colorPicker: HTMLInputElement;
+	private point: ModelPoint = null;
+
+	constructor(vecDraw: VecDraw, colorPicker: HTMLInputElement) {
+		super(vecDraw);
+		this.colorPicker = colorPicker;
+		colorPicker.addEventListener("change", (e: Event) => {
+			this.point.color = (<HTMLInputElement>e.target).value;
+			this.owner.redrawLines();
+		});
+	}
+
+	onEnable(): void {
+	}
+	onDisable(): void {
+	}
+	onMouseMove(e: MouseEvent): void {
+	}
+	onMouseDown(e: MouseEvent): void {
+	}
+	onMouseUp(e: MouseEvent): void {
+		this.point = this.owner.pointAt(e.x, e.y);
+		if (this.point !== null) {
+			this.colorPicker.click();
+		}
+	}
+
+}
+
 class ConnectPointsMode extends AbstractMode {
 
 	private from: ModelPoint;
@@ -129,15 +210,15 @@ class MovePointMode extends AbstractMode {
 
 class AddPointMode extends AbstractMode {
 
-	private pointNum: number;
-
 	constructor(vecDraw: VecDraw) {
 		super(vecDraw);
 	}
 
 	onEnable(): void { }
 
-	onDisable(): void { }
+	onDisable(): void {
+		this.owner.resetTemplatePoint();
+	}
 
 	onMouseMove(e: MouseEvent): void {
 		this.owner.moveTemplatePoint(e.x, e.y);

@@ -23,7 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	modes = new Map();
 	modes.set("a", new AddPointMode(vecDraw));
 	modes.set("m", new MovePointMode(vecDraw));
-	modes.set("c", new ConnectPointsMode(vecDraw, tempCtx, mainRect.left, mainRect.top));
+	modes.set("l", new ConnectPointsMode(vecDraw, tempCtx, mainRect.left, mainRect.top));
+	modes.set("c", new PointColorMode(vecDraw, <HTMLInputElement>document.getElementById("colorPicker")));
+	modes.set("b", new AddConnectedPointMode(vecDraw, tempCtx, mainRect.left, mainRect.top));
 	currentMode = new DummyMode();
 });
 

@@ -7,7 +7,7 @@ class VecDraw {
 
 	private points: Map<number, ModelPoint>;
 	private lines: Map<string, ModelLine>;
-	readonly currentColor: string;
+	private currentColor: string;
 
 	constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement, mainCtx: CanvasRenderingContext2D, canvasLeft: number, canvasTop: number) {
 		this.points = new Map();
@@ -20,7 +20,15 @@ class VecDraw {
 		this.canvasTop = canvasTop;
 	}
 
-	private redrawLines() {
+	public resetTemplatePoint() {
+		this.moveTemplatePoint(-100, -100);
+	}
+
+	public setCurrentColor(color: string) {
+		this.currentColor = color;
+	}
+
+	public redrawLines() {
 		this.mainCtx.clearRect(0, 0, 800, 600);
 		for (const line of this.lines.values()) {
 			//const from = this.points.get(line.from.id);
@@ -46,12 +54,13 @@ class VecDraw {
 		this.templatePoint.y = y;
 	}
 
-	public addPoint() {
+	public addPoint(): ModelPoint {
 		const clone = <HTMLElement>this.templatePoint.elem.cloneNode(true);
 		clone.removeAttribute("id");
 		this.pointHolder.appendChild(clone);
 		const current = new ModelPoint(this.templatePoint.x, this.templatePoint.y, this.currentColor, clone);
 		this.points.set(current.id, current);
+		return current;
 		//this.points.push(new ModelPoint(this.templatePoint.x, this.templatePoint.y, this.currentColor, clone));
 	}
 
@@ -138,23 +147,16 @@ class ModelPoint {
 
 	private point: Point;
 	private connections: Array<ModelPoint>;
-	readonly color: string;
+	private _color: string;
 	readonly id: number;
 	readonly elem: HTMLElement;
 
 	constructor(x: number, y: number, color: string, elem: HTMLElement) {
 		this.point = new Point(x, y);
 		this.connections = [];
-
-		//TODO: purely for testing, remove me
-		//this.color = color;
-		const r = Math.floor(Math.random() * 256);
-		const g = Math.floor(Math.random() * 256);
-		const b = Math.floor(Math.random() * 256);
-		this.color = "#" + r.toString(16) + g.toString(16) + b.toString(16);
-
 		this.id = ModelPoint.count++;
 		this.elem = elem;
+		this.color = color;
 		this.resetElemPos();
 	}
 
@@ -178,6 +180,13 @@ class ModelPoint {
 	}
 
 	//GETTERS AND SETTERS
+	set color(color: string) {
+		this._color = color;
+		this.elem.querySelector(".innerCircle").setAttribute("fill", color);
+	}
+	get color(): string {
+		return this._color;
+	}
 	get x(): number { return this.point.x; }
 	set x(x: number) {
 		this.point.x = x;
