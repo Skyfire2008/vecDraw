@@ -14,6 +14,10 @@
 	#tempCanvas {
 		position: absolute;
 	}
+
+	#gridCanvas {
+		position: absolute;
+	}
 </style>
 
 <body style="background-color: darkslateblue">
@@ -23,10 +27,11 @@
 	<script src="index.js"></script>
 	<canvas id="mainCanvas" width="800" height="600"></canvas>
 	<canvas id="tempCanvas" width="800" height="600"></canvas>
+	<canvas id="gridCanvas" width="800" height="600"></canvas>
 	<div id="pointHolder"></div>
-	<svg id="pointTemplate" width="20" height="20">
-		<circle cx="10" cy="10" r="8" fill="black" stroke="white" stroke-width="2"></circle>
-		<circle class="innerCircle" cx="10" cy="10" r="4" fill="white"></circle>
+	<svg id="pointTemplate" width="10" height="10">
+		<circle cx="5" cy="5" r="4" fill="black" stroke="white" stroke-width="1"></circle>
+		<circle class="innerCircle" cx="5" cy="5" r="2" fill="white"></circle>
 	</svg>
 	<input type="color" id="colorPicker" value="#ffffff" hidden></input>
 </body>

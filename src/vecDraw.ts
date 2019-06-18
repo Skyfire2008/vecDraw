@@ -2,6 +2,9 @@ class VecDraw {
 	private templatePoint: ModelPoint;
 	private pointHolder: HTMLElement;
 	private mainCtx: CanvasRenderingContext2D;
+	private gridCtx: CanvasRenderingContext2D;
+	public gridWidth: number;
+	public gridHeight: number;
 	private canvasLeft: number;
 	private canvasTop: number;
 
@@ -9,15 +12,55 @@ class VecDraw {
 	private lines: Map<string, ModelLine>;
 	private currentColor: string;
 
-	constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement, mainCtx: CanvasRenderingContext2D, canvasLeft: number, canvasTop: number) {
+	constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement, mainCtx: CanvasRenderingContext2D, gridCtx: CanvasRenderingContext2D, canvasLeft: number, canvasTop: number) {
 		this.points = new Map();
 		this.lines = new Map();
 		this.currentColor = "white";
 		this.pointHolder = pointHolder;
 		this.templatePoint = new ModelPoint(0, 0, this.currentColor, pointTemplateElem);
 		this.mainCtx = mainCtx;
+		this.gridCtx = gridCtx;
 		this.canvasLeft = canvasLeft;
 		this.canvasTop = canvasTop;
+	}
+
+	public redrawGrid() {
+		this.gridCtx.clearRect(0, 0, 800, 600);
+		this.gridCtx.strokeStyle = "#ff8800";
+
+		let x = 400;
+		this.gridCtx.beginPath();
+		while (x <= 800) {
+			let foo = Math.floor(x) + 0.5;
+			this.gridCtx.moveTo(foo, 0);
+			this.gridCtx.lineTo(foo, 600);
+			x += this.gridWidth;
+		}
+
+		x = 400;
+		while (x >= 0) {
+			let foo = Math.floor(x) + 0.5;
+			this.gridCtx.moveTo(foo, 0);
+			this.gridCtx.lineTo(foo, 600);
+			x -= this.gridWidth;
+		}
+
+		let y = 300;
+		while (y <= 600) {
+			let foo = Math.floor(y) + 0.5;
+			this.gridCtx.moveTo(0, foo);
+			this.gridCtx.lineTo(800, foo);
+			y += this.gridHeight;
+		}
+
+		y = 300;
+		while (y >= 0) {
+			let foo = Math.floor(y) + 0.5;
+			this.gridCtx.moveTo(0, foo);
+			this.gridCtx.lineTo(800, foo);
+			y -= this.gridHeight;
+		}
+		this.gridCtx.stroke();
 	}
 
 	public resetTemplatePoint() {
@@ -141,7 +184,7 @@ class ModelLine {
 
 class ModelPoint {
 
-	static readonly radius = 10;
+	static readonly radius = 5;
 	static readonly radius2 = ModelPoint.radius * ModelPoint.radius;
 	private static count: number = -1;
 
@@ -175,8 +218,7 @@ class ModelPoint {
 	}
 
 	public resetElemPos() {
-		//TODO: put 10, the radius, into a constant
-		this.elem.setAttribute("style", `left: ${this.point.x - 10}px; top: ${this.point.y - 10}px`);
+		this.elem.setAttribute("style", `left: ${this.point.x - ModelPoint.radius}px; top: ${this.point.y - ModelPoint.radius}px`);
 	}
 
 	//GETTERS AND SETTERS

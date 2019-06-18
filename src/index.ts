@@ -19,7 +19,14 @@ document.addEventListener("DOMContentLoaded", () => {
 	tempCtx.lineWidth = 2;
 	tempCtx.strokeStyle = "white";
 
-	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCtx, mainRect.left, mainRect.top);
+	const gridCanvas = <HTMLCanvasElement>document.getElementById("gridCanvas");
+	gridCanvas.setAttribute("style", `left: ${mainRect.left}px; top: ${mainRect.top}px`);
+
+	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCtx, gridCanvas.getContext("2d"), mainRect.left, mainRect.top);
+	vecDraw.gridWidth = 20;
+	vecDraw.gridHeight = 20;
+	vecDraw.redrawGrid();
+
 	modes = new Map();
 	modes.set("a", new AddPointMode(vecDraw));
 	modes.set("m", new MovePointMode(vecDraw));
