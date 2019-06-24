@@ -5,8 +5,8 @@ class VecDraw {
 	private gridCtx: CanvasRenderingContext2D;
 	public gridWidth: number;
 	public gridHeight: number;
-	private canvasLeft: number;
-	private canvasTop: number;
+	public canvasLeft: number;
+	public canvasTop: number;
 
 	private points: Map<number, ModelPoint>;
 	private lines: Map<string, ModelLine>;
@@ -105,7 +105,7 @@ class VecDraw {
 
 	public moveTemplatePoint(x: number, y: number) {
 		const pos = new Point(x, y);
-		this.templatePoint.pos = this.attachToGrid(pos);
+		this.templatePoint.gridPos = this.attachToGrid(pos);
 		this.templatePoint.resetElemPos();
 	}
 
@@ -119,7 +119,11 @@ class VecDraw {
 		//this.points.push(new ModelPoint(this.templatePoint.x, this.templatePoint.y, this.currentColor, clone));
 	}
 
-	public addLine(fromId: number, toId: number) {
+	public removeLine(from: ModelPoint, to: ModelPoint): boolean {
+
+	}
+
+	public addLine(from: ModelPoint, to: ModelPoint) {
 		let to = this.points.get(toId);
 		let from = this.points.get(fromId);
 		if (to !== undefined && from !== undefined) {
@@ -163,7 +167,7 @@ class VecDraw {
 
 	public movePoint(id: number, x: number, y: number): void {
 		const pos = new Point(x, y);
-		this.points.get(id).pos = this.attachToGrid(pos);
+		this.points.get(id).gridPos = this.attachToGrid(pos);
 		this.points.get(id).resetElemPos();
 		this.redrawLines();
 	}
@@ -196,65 +200,5 @@ class ModelLine {
 		this.to = to;
 		//TODO: eliminate double swap of to and from
 		this.id = ModelLine.makeId(from.id, to.id);
-	}
-}
-
-class ModelPoint {
-
-	static readonly radius = 5;
-	static readonly radius2 = ModelPoint.radius * ModelPoint.radius;
-	private static count: number = -1;
-
-	public pos: Point;
-	private connections: Array<ModelPoint>;
-	private _color: string;
-	readonly id: number;
-	readonly elem: HTMLElement;
-
-	constructor(x: number, y: number, color: string, elem: HTMLElement) {
-		this.pos = new Point(x, y);
-		this.connections = [];
-		this.id = ModelPoint.count++;
-		this.elem = elem;
-		this.color = color;
-		this.resetElemPos();
-	}
-
-	public containsPoint(x: number, y: number): boolean {
-		let dx = this.x - x;
-		let dy = this.y - y;
-		return dx * dx + dy * dy < ModelPoint.radius2;
-	}
-
-	public connectTo(other: ModelPoint) {
-		if (other.id < this.id) {
-			other.connectTo(this);
-		} else {
-			this.connections.push(other);
-		}
-	}
-
-	public resetElemPos() {
-		this.elem.setAttribute("style", `left: ${this.pos.x - ModelPoint.radius}px; top: ${this.pos.y - ModelPoint.radius}px`);
-	}
-
-	//GETTERS AND SETTERS
-	set color(color: string) {
-		this._color = color;
-		this.elem.querySelector(".innerCircle").setAttribute("fill", color);
-	}
-	get color(): string {
-		return this._color;
-	}
-	get x(): number { return this.pos.x; }
-	set x(x: number) {
-		this.pos.x = x;
-		this.resetElemPos();
-	}
-
-	get y(): number { return this.pos.y; }
-	set y(y: number) {
-		this.pos.y = y;
-		this.resetElemPos();
 	}
 }
