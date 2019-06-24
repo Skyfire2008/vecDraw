@@ -7,6 +7,14 @@ class Point {
 		this.y = y;
 	}
 
+	public add(other: Point): Point {
+		return new Point(this.x + other.x, this.y + other.y);
+	}
+
+	public sub(other: Point): Point {
+		return new Point(this.x - other.x, this.y - other.y);
+	}
+
 	public dot(other: Point): number {
 		return this.x * other.x + this.y * other.y;
 	};

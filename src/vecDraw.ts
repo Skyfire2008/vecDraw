@@ -24,6 +24,17 @@ class VecDraw {
 		this.canvasTop = canvasTop;
 	}
 
+	public attachToGrid(pos: Point): Point {
+
+		const canvasPos = new Point(this.canvasLeft, this.canvasTop);
+
+		pos = pos.sub(canvasPos);
+		pos.x = Math.round(pos.x / this.gridWidth) * this.gridWidth;
+		pos.y = Math.round(pos.y / this.gridHeight) * this.gridHeight;
+
+		return pos.add(canvasPos);
+	}
+
 	public redrawGrid() {
 		this.gridCtx.clearRect(0, 0, 800, 600);
 		this.gridCtx.strokeStyle = "#ff8800";
@@ -93,8 +104,9 @@ class VecDraw {
 	}
 
 	public moveTemplatePoint(x: number, y: number) {
-		this.templatePoint.x = x;
-		this.templatePoint.y = y;
+		const pos = new Point(x, y);
+		this.templatePoint.pos = this.attachToGrid(pos);
+		this.templatePoint.resetElemPos();
 	}
 
 	public addPoint(): ModelPoint {
@@ -111,6 +123,10 @@ class VecDraw {
 		let to = this.points.get(toId);
 		let from = this.points.get(fromId);
 		if (to !== undefined && from !== undefined) {
+
+			to.connectTo(from);
+			from.connectTo(to);
+
 			const line = new ModelLine(from, to);
 			this.lines.set(line.id, line);
 
@@ -146,8 +162,9 @@ class VecDraw {
 	}
 
 	public movePoint(id: number, x: number, y: number): void {
-		this.points.get(id).x = x;
-		this.points.get(id).y = y;
+		const pos = new Point(x, y);
+		this.points.get(id).pos = this.attachToGrid(pos);
+		this.points.get(id).resetElemPos();
 		this.redrawLines();
 	}
 }
@@ -188,14 +205,14 @@ class ModelPoint {
 	static readonly radius2 = ModelPoint.radius * ModelPoint.radius;
 	private static count: number = -1;
 
-	private point: Point;
+	public pos: Point;
 	private connections: Array<ModelPoint>;
 	private _color: string;
 	readonly id: number;
 	readonly elem: HTMLElement;
 
 	constructor(x: number, y: number, color: string, elem: HTMLElement) {
-		this.point = new Point(x, y);
+		this.pos = new Point(x, y);
 		this.connections = [];
 		this.id = ModelPoint.count++;
 		this.elem = elem;
@@ -218,7 +235,7 @@ class ModelPoint {
 	}
 
 	public resetElemPos() {
-		this.elem.setAttribute("style", `left: ${this.point.x - ModelPoint.radius}px; top: ${this.point.y - ModelPoint.radius}px`);
+		this.elem.setAttribute("style", `left: ${this.pos.x - ModelPoint.radius}px; top: ${this.pos.y - ModelPoint.radius}px`);
 	}
 
 	//GETTERS AND SETTERS
@@ -229,15 +246,15 @@ class ModelPoint {
 	get color(): string {
 		return this._color;
 	}
-	get x(): number { return this.point.x; }
+	get x(): number { return this.pos.x; }
 	set x(x: number) {
-		this.point.x = x;
+		this.pos.x = x;
 		this.resetElemPos();
 	}
 
-	get y(): number { return this.point.y; }
+	get y(): number { return this.pos.y; }
 	set y(y: number) {
-		this.point.y = y;
+		this.pos.y = y;
 		this.resetElemPos();
 	}
 }
