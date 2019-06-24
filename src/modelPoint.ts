@@ -5,7 +5,11 @@ class ModelPoint {
 	private static count: number = -1;
 
 	public gridPos: Point;
+<<<<<<< HEAD
 	private connections: Map<number, ModelPoint>;
+=======
+	private connections: Set<ModelPoint>;
+>>>>>>> d0b2a08e6c757d77a900aa5f0981a520968cfe33
 	private _color: string;
 
 	readonly owner: VecDraw;
@@ -15,7 +19,11 @@ class ModelPoint {
 	constructor(x: number, y: number, owner: VecDraw, color: string, elem: HTMLElement) {
 		this.owner = owner;
 		this.gridPos = new Point(x, y);
+<<<<<<< HEAD
 		this.connections = new Map<number, ModelPoint>();
+=======
+		this.connections = new Set<ModelPoint>();
+>>>>>>> d0b2a08e6c757d77a900aa5f0981a520968cfe33
 		this.id = ModelPoint.count++;
 		this.elem = elem;
 		this.color = color;
@@ -34,10 +42,17 @@ class ModelPoint {
 	}
 
 	public addDeleteConnection(other: ModelPoint) {
+<<<<<<< HEAD
 		if (this.connections.has(other.id)) {
 			this.connections.delete(other.id);
 		} else {
 			this.connections.set(other.id, other);
+=======
+		if (other.id < this.id) {
+			other.connectTo(this);
+		} else {
+			this.connections.push(other);
+>>>>>>> d0b2a08e6c757d77a900aa5f0981a520968cfe33
 		}
 	}
 
