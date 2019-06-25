@@ -15,24 +15,24 @@ class VecDraw {
 	constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement, mainCtx: CanvasRenderingContext2D, gridCtx: CanvasRenderingContext2D, canvasLeft: number, canvasTop: number) {
 		this.points = new Map();
 		this.lines = new Map();
-		this.currentColor = "white";
+		this.currentColor = "#ffffff";
 		this.pointHolder = pointHolder;
-		this.templatePoint = new ModelPoint(0, 0, this.currentColor, pointTemplateElem);
+		this.templatePoint = new ModelPoint(new Point(0, 0), this, this.currentColor, pointTemplateElem);
 		this.mainCtx = mainCtx;
 		this.gridCtx = gridCtx;
 		this.canvasLeft = canvasLeft;
 		this.canvasTop = canvasTop;
 	}
 
-	public attachToGrid(pos: Point): Point {
+	public getGridPos(pos: Point): Point {
 
 		const canvasPos = new Point(this.canvasLeft, this.canvasTop);
 
 		pos = pos.sub(canvasPos);
-		pos.x = Math.round(pos.x / this.gridWidth) * this.gridWidth;
-		pos.y = Math.round(pos.y / this.gridHeight) * this.gridHeight;
+		pos.x = Math.round(pos.x / this.gridWidth)/* * this.gridWidth*/;
+		pos.y = Math.round(pos.y / this.gridHeight)/* * this.gridHeight*/;
 
-		return pos.add(canvasPos);
+		return pos/*.add(canvasPos)*/;
 	}
 
 	public redrawGrid() {
@@ -75,7 +75,7 @@ class VecDraw {
 	}
 
 	public resetTemplatePoint() {
-		this.moveTemplatePoint(-100, -100);
+		this.moveTemplatePoint(new Point(-100, -100));
 	}
 
 	public setCurrentColor(color: string) {
@@ -103,9 +103,8 @@ class VecDraw {
 		}
 	}
 
-	public moveTemplatePoint(x: number, y: number) {
-		const pos = new Point(x, y);
-		this.templatePoint.gridPos = this.attachToGrid(pos);
+	public moveTemplatePoint(pos: Point) {
+		this.templatePoint.gridPos = this.getGridPos(pos);
 		this.templatePoint.resetElemPos();
 	}
 
@@ -113,23 +112,23 @@ class VecDraw {
 		const clone = <HTMLElement>this.templatePoint.elem.cloneNode(true);
 		clone.removeAttribute("id");
 		this.pointHolder.appendChild(clone);
-		const current = new ModelPoint(this.templatePoint.x, this.templatePoint.y, this.currentColor, clone);
+		const current = new ModelPoint(this.templatePoint.gridPos, this, this.currentColor, clone);
 		this.points.set(current.id, current);
 		return current;
 		//this.points.push(new ModelPoint(this.templatePoint.x, this.templatePoint.y, this.currentColor, clone));
 	}
 
 	public removeLine(from: ModelPoint, to: ModelPoint): boolean {
-
+		return false;
 	}
 
-	public addLine(from: ModelPoint, to: ModelPoint) {
+	public addLine(fromId: number, toId: number) {
 		let to = this.points.get(toId);
 		let from = this.points.get(fromId);
 		if (to !== undefined && from !== undefined) {
 
-			to.connectTo(from);
-			from.connectTo(to);
+			to.connectTo(fromId);
+			from.connectTo(toId);
 
 			const line = new ModelLine(from, to);
 			this.lines.set(line.id, line);
@@ -152,12 +151,16 @@ class VecDraw {
 		}
 	}
 
-	public pointAt(x: number, y: number): ModelPoint {
-		let result: ModelPoint = null;
+	public setPointColor(id: number, color: string) {
+		this.points.get(id).color = color;
+	}
+
+	public pointAt(pos: Point): number {
+		let result = -1;
 
 		for (const point of this.points.values()) {
-			if (point.containsPoint(x, y)) {
-				result = point;
+			if (point.containsPoint(pos)) {
+				result = point.id;
 				break;
 			}
 		}
@@ -165,9 +168,8 @@ class VecDraw {
 		return result;
 	}
 
-	public movePoint(id: number, x: number, y: number): void {
-		const pos = new Point(x, y);
-		this.points.get(id).gridPos = this.attachToGrid(pos);
+	public movePoint(id: number, pos: Point): void {
+		this.points.get(id).gridPos = this.getGridPos(pos);
 		this.points.get(id).resetElemPos();
 		this.redrawLines();
 	}

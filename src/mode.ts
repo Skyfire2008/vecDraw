@@ -43,7 +43,7 @@ class AddConnectedPointMode extends AbstractMode {
 	}
 
 	onMouseMove(e: MouseEvent): void {
-		this.owner.moveTemplatePoint(e.x, e.y);
+		this.owner.moveTemplatePoint(new Point(e.x, e.y));
 		if (this.prevPoint !== null) {
 			this.tempCtx.clearRect(0, 0, 800, 600);
 			this.tempCtx.beginPath();
@@ -63,7 +63,7 @@ class AddConnectedPointMode extends AbstractMode {
 	}
 
 	onMouseDown(e: MouseEvent): void {
-		const foo = this.owner.pointAt(e.x, e.y);
+		const foo = this.owner.pointAt(new Point(e.x, e.y));
 		if (foo !== null) {
 			this.prevPoint = foo;
 			this.owner.setCurrentColor(this.prevPoint.color);
@@ -74,13 +74,13 @@ class AddConnectedPointMode extends AbstractMode {
 class PointColorMode extends AbstractMode {
 
 	private colorPicker: HTMLInputElement;
-	private point: ModelPoint = null;
+	private pointId: number = -1;
 
 	constructor(vecDraw: VecDraw, colorPicker: HTMLInputElement) {
 		super(vecDraw);
 		this.colorPicker = colorPicker;
 		colorPicker.addEventListener("change", (e: Event) => {
-			this.point.color = (<HTMLInputElement>e.target).value;
+			this.owner.setPointColor(this.pointId, (<HTMLInputElement>e.target).value);
 			this.owner.redrawLines();
 		});
 	}
@@ -94,8 +94,8 @@ class PointColorMode extends AbstractMode {
 	onMouseDown(e: MouseEvent): void {
 	}
 	onMouseUp(e: MouseEvent): void {
-		this.point = this.owner.pointAt(e.x, e.y);
-		if (this.point !== null) {
+		this.pointId = this.owner.pointAt(new Point(e.x, e.y));
+		if (this.pointId !== -1) {
 			this.colorPicker.click();
 		}
 	}
@@ -104,8 +104,8 @@ class PointColorMode extends AbstractMode {
 
 class ConnectPointsMode extends AbstractMode {
 
-	private from: ModelPoint;
-	private to: ModelPoint;
+	private from: number;
+	private to: number;
 	private tempCtx: CanvasRenderingContext2D;
 	private canvasLeft: number;
 	private canvasTop: number;
@@ -113,24 +113,24 @@ class ConnectPointsMode extends AbstractMode {
 	constructor(vecDraw: VecDraw, tempCtx: CanvasRenderingContext2D, canvasLeft: number, canvasTop: number) {
 		super(vecDraw);
 		this.tempCtx = tempCtx;
-		this.from = null;
-		this.to = null;
+		this.from = -1;
+		this.to = -1;
 		this.canvasLeft = canvasLeft;
 		this.canvasTop = canvasTop;
 	}
 
 	onEnable(): void { }
 	onDisable(): void {
-		this.from = null;
-		this.to = null;
+		this.from = -1;
+		this.to = -1;
 	}
 	onMouseMove(e: MouseEvent): void {
 		//only run if already connected to one point
-		if (this.from !== null) {
+		if (this.from !== -1) {
 
 			//if not connected to "to", find it and draw a line to it
-			if (this.to === null) {
-				this.to = this.owner.pointAt(e.x, e.y);
+			if (this.to === -1) {
+				this.to = this.owner.pointAt(new Point(e.x, e.y));
 				//if "to" is found, draw the line once
 				if (this.to !== null) {
 					this.tempCtx.clearRect(0, 0, 800, 600);
@@ -196,7 +196,7 @@ class MovePointMode extends AbstractMode {
 	}
 	onMouseMove(e: MouseEvent): void {
 		if (this.pointId >= 0) {
-			this.owner.movePoint(this.pointId, e.x + this.translation.x, e.y + this.translation.y);
+			this.owner.movePoint(this.pointId, new Point(e.x, e.y));
 		}
 	}
 	onMouseUp(e: MouseEvent): void {
@@ -221,7 +221,7 @@ class AddPointMode extends AbstractMode {
 	}
 
 	onMouseMove(e: MouseEvent): void {
-		this.owner.moveTemplatePoint(e.x, e.y);
+		this.owner.moveTemplatePoint(new Point(e.x, e.y));
 	}
 
 	onMouseUp(e: MouseEvent): void {

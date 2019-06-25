@@ -5,40 +5,40 @@ class ModelPoint {
 	private static count: number = -1;
 
 	public gridPos: Point;
-	private connections: Map<number, ModelPoint>;
+	private connections: Set<number>;
 	private _color: string;
 
 	readonly owner: VecDraw;
 	readonly id: number;
 	readonly elem: HTMLElement;
 
-	constructor(x: number, y: number, owner: VecDraw, color: string, elem: HTMLElement) {
+	constructor(gridPos: Point, owner: VecDraw, color: string, elem: HTMLElement) {
 		this.owner = owner;
-		this.gridPos = new Point(x, y);
-		this.connections = new Map<number, ModelPoint>();
+		this.gridPos = gridPos;
+		this.connections = new Set<number>();
 		this.id = ModelPoint.count++;
 		this.elem = elem;
 		this.color = color;
 		this.resetElemPos();
 	}
 
-	public containsPoint(x: number, y: number): boolean {
-		let dx = this.x - x;
-		let dy = this.y - y;
-		return dx * dx + dy * dy < ModelPoint.radius2;
+	public connectTo(otherID: number) {
+		this.connections.add(otherID);
 	}
 
-	public moveTo(gridPos: Point) {
-		this.gridPos = gridPos;
-		this.resetElemPos();
-	}
-
-	public addDeleteConnection(other: ModelPoint) {
-		if (this.connections.has(other.id)) {
-			this.connections.delete(other.id);
-		} else {
-			this.connections.set(other.id, other);
+	public getConnections(): Array<number> {
+		const result: Array<number> = [];
+		for (let i of this.connections) {
+			result.push(i);
 		}
+		return result;
+	}
+
+	public containsPoint(pos: Point): boolean {
+		//TODO: use distance function of Point, cache actuall coordinates(x, y)
+		let dx = this.x - pos.x;
+		let dy = this.y - pos.y;
+		return dx * dx + dy * dy < ModelPoint.radius2;
 	}
 
 	public resetElemPos() {
