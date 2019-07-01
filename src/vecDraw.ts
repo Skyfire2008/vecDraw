@@ -1,11 +1,11 @@
 class VecDraw {
-	private templatePoint: ModelPoint;
+	public templatePoint: ModelPoint;
 	private pointHolder: HTMLElement;
 	private mainCtx: CanvasRenderingContext2D;
 	private gridCtx: CanvasRenderingContext2D;
 	public gridWidth: number;
 	public gridHeight: number;
-	private canvasPos: Point;
+	public readonly canvasPos: Point;
 
 	private points: Map<number, ModelPoint>;
 	private lines: Map<string, ModelLine>;
@@ -14,34 +14,31 @@ class VecDraw {
 	constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement, mainCtx: CanvasRenderingContext2D, gridCtx: CanvasRenderingContext2D, canvasPos: Point) {
 		this.points = new Map();
 		this.lines = new Map();
-		this.currentColor = "white";
+		this.currentColor = "#ffffff";
 		this.pointHolder = pointHolder;
+		this.canvasPos = canvasPos;
 		this.templatePoint = new ModelPoint(0, 0, this, this.currentColor, pointTemplateElem);
 		this.mainCtx = mainCtx;
 		this.gridCtx = gridCtx;
-		this.canvasPos = canvasPos;
 	}
 
-	public attachToGrid(pos: Point): Point {
-
-		pos = pos.sub(this.canvasPos);
-		pos.x = Math.round(pos.x / this.gridWidth) * this.gridWidth;
-		pos.y = Math.round(pos.y / this.gridHeight) * this.gridHeight;
-
-		return pos.add(this.canvasPos);
+	public globalToModelPos(pos: Point): Point {
+		const x = Math.round((pos.x - this.canvasPos.x) / this.gridWidth);
+		const y = Math.round((pos.y - this.canvasPos.y) / this.gridHeight);
+		return new Point(x, y);
 	}
 
-	/*public drawLine(ctx: CanvasRenderingContext2D, from: ModelPoint, to: ModelPoint) {
-		const grad = this.mainCtx.createLinearGradient(startPos.x, startPos.y, endPos.x, endPos.y);
+	public drawLine(ctx: CanvasRenderingContext2D, from: ModelPoint, to: ModelPoint) {
+		const grad = ctx.createLinearGradient(from.canvasPos.x, from.canvasPos.y, to.canvasPos.x, to.canvasPos.y);
 		grad.addColorStop(0, from.color);
 		grad.addColorStop(1, to.color);
-		this.mainCtx.strokeStyle = grad;
+		ctx.strokeStyle = grad;
 
-		this.mainCtx.beginPath();
-		this.mainCtx.moveTo(line.from.x - this.canvasPos.x, line.from.y - this.canvasPos.y);
-		this.mainCtx.lineTo(line.to.x - this.canvasPos.x, line.to.y - this.canvasPos.y);
-		this.mainCtx.stroke();
-	}*/
+		ctx.beginPath();
+		ctx.moveTo(from.canvasPos.x, from.canvasPos.y);
+		ctx.lineTo(to.canvasPos.x, to.canvasPos.y);
+		ctx.stroke();
+	}
 
 	public redrawGrid() {
 		this.gridCtx.clearRect(0, 0, 800, 600);
@@ -93,27 +90,13 @@ class VecDraw {
 	public redrawLines() {
 		this.mainCtx.clearRect(0, 0, 800, 600);
 		for (const line of this.lines.values()) {
-			//const from = this.points.get(line.from.id);
-			//const to = this.points.get(line.to.id);
-
-			const startPos = new Point(line.from.x - this.canvasPos.x, line.from.y - this.canvasPos.y);
-			const endPos = new Point(line.to.x - this.canvasPos.x, line.to.y - this.canvasPos.y);
-
-			const grad = this.mainCtx.createLinearGradient(startPos.x, startPos.y, endPos.x, endPos.y);
-			grad.addColorStop(0, line.from.color);
-			grad.addColorStop(1, line.to.color);
-			this.mainCtx.strokeStyle = grad;
-
-			this.mainCtx.beginPath();
-			this.mainCtx.moveTo(line.from.x - this.canvasPos.x, line.from.y - this.canvasPos.y);
-			this.mainCtx.lineTo(line.to.x - this.canvasPos.x, line.to.y - this.canvasPos.y);
-			this.mainCtx.stroke();
+			this.drawLine(this.mainCtx, line.from, line.to);
 		}
 	}
 
 	public moveTemplatePoint(x: number, y: number) {
 		const pos = new Point(x, y);
-		this.templatePoint.pos = this.attachToGrid(pos);
+		this.templatePoint.pos = this.globalToModelPos(pos);
 		this.templatePoint.resetElemPos();
 	}
 
@@ -138,19 +121,7 @@ class VecDraw {
 			const line = new ModelLine(from, to);
 			this.lines.set(line.id, line);
 
-			//TODO: add a function to draw a single line
-			const startPos = new Point(line.from.x - this.canvasPos.x, line.from.y - this.canvasPos.y);
-			const endPos = new Point(line.to.x - this.canvasPos.x, line.to.y - this.canvasPos.y);
-
-			const grad = this.mainCtx.createLinearGradient(startPos.x, startPos.y, endPos.x, endPos.y);
-			grad.addColorStop(0, line.from.color);
-			grad.addColorStop(1, line.to.color);
-			this.mainCtx.strokeStyle = grad;
-
-			this.mainCtx.beginPath();
-			this.mainCtx.moveTo(line.from.x - this.canvasPos.x, line.from.y - this.canvasPos.y);
-			this.mainCtx.lineTo(line.to.x - this.canvasPos.x, line.to.y - this.canvasPos.y);
-			this.mainCtx.stroke();
+			this.drawLine(this.mainCtx, to, from);
 		} else {
 			throw `Either ${fromId} or ${toId} is an invalid point ID`;
 		}
@@ -158,21 +129,15 @@ class VecDraw {
 
 	public pointAt(x: number, y: number): ModelPoint {
 		let result: ModelPoint = null;
+		const globalPos = new Point(x, y);
 
 		for (const point of this.points.values()) {
-			if (point.containsPoint(x, y)) {
+			if (point.globalPos.distance(globalPos) < ModelPoint.radius) {
 				result = point;
 				break;
 			}
 		}
 
 		return result;
-	}
-
-	public movePoint(id: number, x: number, y: number): void {
-		const pos = new Point(x, y);
-		this.points.get(id).pos = this.attachToGrid(pos);
-		this.points.get(id).resetElemPos();
-		this.redrawLines();
 	}
 }

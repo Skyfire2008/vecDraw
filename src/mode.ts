@@ -46,10 +46,7 @@ class AddConnectedPointMode extends AbstractMode {
 		this.owner.moveTemplatePoint(e.x, e.y);
 		if (this.prevPoint !== null) {
 			this.tempCtx.clearRect(0, 0, 800, 600);
-			this.tempCtx.beginPath();
-			this.tempCtx.moveTo(this.prevPoint.x - this.canvasLeft, this.prevPoint.y - this.canvasTop);
-			this.tempCtx.lineTo(e.x - this.canvasLeft, e.y - this.canvasTop);
-			this.tempCtx.stroke();
+			this.owner.drawLine(this.tempCtx, this.prevPoint, this.owner.templatePoint);
 		}
 	}
 
@@ -81,7 +78,9 @@ class PointColorMode extends AbstractMode {
 		this.colorPicker = colorPicker;
 		colorPicker.addEventListener("change", (e: Event) => {
 			this.point.color = (<HTMLInputElement>e.target).value;
-			this.owner.redrawLines();
+			if (this.point.hasConnections()) {
+				this.owner.redrawLines();
+			}
 		});
 	}
 
@@ -134,22 +133,20 @@ class ConnectPointsMode extends AbstractMode {
 				//if "to" is found, draw the line once
 				if (this.to !== null) {
 					this.tempCtx.clearRect(0, 0, 800, 600);
-					this.tempCtx.beginPath();
-					this.tempCtx.moveTo(this.from.x - this.canvasLeft, this.from.y - this.canvasTop);
-					this.tempCtx.lineTo(this.to.x - this.canvasLeft, this.to.y - this.canvasTop);
-					this.tempCtx.stroke();
+					this.owner.drawLine(this.tempCtx, this.from, this.to);
 				}
 
 				//if already connected to "to", check if still connected
-			} else if (!this.to.containsPoint(e.x, e.y)) {
+			} else if (this.to.globalPos.distance(new Point(e.x, e.y)) > ModelPoint.radius) {
 				this.to = null;
 			}
 
 			//only if not connected to "to", draw the line to mouse
 			if (this.to === null) {
 				this.tempCtx.clearRect(0, 0, 800, 600);
+				this.tempCtx.strokeStyle = "white";
 				this.tempCtx.beginPath();
-				this.tempCtx.moveTo(this.from.x - this.canvasLeft, this.from.y - this.canvasTop);
+				this.tempCtx.moveTo(this.from.canvasPos.x, this.from.canvasPos.y);
 				this.tempCtx.lineTo(e.x - this.canvasLeft, e.y - this.canvasTop);
 				this.tempCtx.stroke();
 			}
@@ -178,30 +175,31 @@ class DummyMode implements Mode {
 
 class MovePointMode extends AbstractMode {
 
-	private pointId: number;
-	private translation: Point;
+	private point: ModelPoint;
 
 	constructor(vecDraw: VecDraw) {
 		super(vecDraw);
-		this.pointId = -1;
-		this.translation = null;
+		this.point = null;
 	}
 
 	onMouseDown(e: MouseEvent): void {
 		const point = this.owner.pointAt(e.x, e.y);
 		if (point != null) {
-			this.pointId = point.id;
-			this.translation = new Point(point.x - e.x, point.y - e.y);
+			this.point = point;
 		}
 	}
 	onMouseMove(e: MouseEvent): void {
-		if (this.pointId >= 0) {
-			this.owner.movePoint(this.pointId, e.x + this.translation.x, e.y + this.translation.y);
+		if (this.point !== null) {
+			this.point.pos = this.owner.globalToModelPos(new Point(e.x, e.y));
+			this.point.resetElemPos();
+			if (this.point.hasConnections()) {
+				this.owner.redrawLines();
+			}
+			//this.owner.movePoint(this.pointId, e.x, e.y);
 		}
 	}
 	onMouseUp(e: MouseEvent): void {
-		this.pointId = -1;
-		this.translation = null;
+		this.point = null;
 	}
 	onEnable(): void { }
 	onDisable(): void { }

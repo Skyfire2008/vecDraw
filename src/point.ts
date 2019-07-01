@@ -15,9 +15,17 @@ class Point {
 		return new Point(this.x - other.x, this.y - other.y);
 	}
 
+	public mult(m: number): Point {
+		return new Point(this.x * m, this.y * m);
+	}
+
 	public dot(other: Point): number {
 		return this.x * other.x + this.y * other.y;
-	};
+	}
+
+	public distance(other: Point): number {
+		return this.sub(other).length();
+	}
 
 	public length(): number {
 		return Math.sqrt(this.x * this.x + this.y * this.y);

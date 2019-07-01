@@ -1,7 +1,7 @@
 class ModelPoint {
 
-	static readonly radius = 5;
-	static readonly radius2 = ModelPoint.radius * ModelPoint.radius;
+	public static readonly radius = 5;
+	public static readonly radius2 = ModelPoint.radius * ModelPoint.radius;
 	private static count: number = -1;
 
 	public pos: Point;
@@ -21,11 +21,11 @@ class ModelPoint {
 		this.resetElemPos();
 	}
 
-	public containsPoint(x: number, y: number): boolean {
+	/*public containsPoint(x: number, y: number): boolean {
 		let dx = this.x - x;
 		let dy = this.y - y;
 		return dx * dx + dy * dy < ModelPoint.radius2;
-	}
+	}*/
 
 	public connectTo(other: ModelPoint) {
 		if (other.id !== this.id) {
@@ -34,14 +34,26 @@ class ModelPoint {
 		}
 	}
 
+	public hasConnections(): boolean {
+		return this.connections.size > 0;
+	}
+
 	public resetElemPos() {
-		this.elem.setAttribute("style", `left: ${this.pos.x - ModelPoint.radius}px; top: ${this.pos.y - ModelPoint.radius}px`);
+		const x = this.pos.x * this.owner.gridWidth - ModelPoint.radius + this.owner.canvasPos.x;
+		const y = this.pos.y * this.owner.gridHeight - ModelPoint.radius + this.owner.canvasPos.y;
+		this.elem.setAttribute("style", `left: ${x}px; top: ${y}px`);
 	}
 
 	//GETTERS AND SETTERS
-	/*get canvasPoint(): Point{
+	get canvasPos(): Point {
+		const x = this.pos.x * this.owner.gridWidth;
+		const y = this.pos.y * this.owner.gridHeight;
+		return new Point(x, y);
+	}
 
-	}*/
+	get globalPos(): Point {
+		return this.canvasPos.add(this.owner.canvasPos);
+	}
 
 	set color(color: string) {
 		this._color = color;
