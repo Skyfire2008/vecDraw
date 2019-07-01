@@ -21,6 +21,43 @@ abstract class AbstractMode implements Mode {
 	abstract onMouseUp(e: MouseEvent): void;
 }
 
+class DeleteMode extends AbstractMode {
+
+	private from: ModelPoint;
+	private to: ModelPoint;
+
+	constructor(vecDraw: VecDraw) {
+		super(vecDraw);
+		this.from = null;
+		this.to = null;
+	}
+
+	onEnable(): void {
+	}
+	onDisable(): void {
+		this.from = null;
+		this.to = null;
+	}
+	onMouseMove(e: MouseEvent): void {
+	}
+	onMouseDown(e: MouseEvent): void {
+		this.from = this.owner.pointAt(e.x, e.y);
+	}
+	onMouseUp(e: MouseEvent): void {
+		this.to = this.owner.pointAt(e.x, e.y);
+		if (this.from != null) {
+			if (this.to.id !== this.from.id) {
+				this.owner.removeLine(this.to.id, this.from.id);
+			} else {
+				this.owner.removePoint(this.from.id);
+			}
+		}
+
+		this.to = null;
+		this.from = null;
+	}
+}
+
 class AddConnectedPointMode extends AbstractMode {
 	private prevPoint: ModelPoint;
 	private tempCtx: CanvasRenderingContext2D;

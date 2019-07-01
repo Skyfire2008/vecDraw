@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	modes.set("l", new ConnectPointsMode(vecDraw, tempCtx, mainRect.left, mainRect.top));
 	modes.set("c", new PointColorMode(vecDraw, <HTMLInputElement>document.getElementById("colorPicker")));
 	modes.set("b", new AddConnectedPointMode(vecDraw, tempCtx, mainRect.left, mainRect.top));
+	modes.set("d", new DeleteMode(vecDraw));
 	currentMode = new DummyMode();
 });
 

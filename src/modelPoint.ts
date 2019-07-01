@@ -6,7 +6,7 @@ class ModelPoint {
 
 	public pos: Point;
 	public readonly owner: VecDraw;
-	private connections: Set<Number>;
+	private connections: Set<number>;
 	private _color: string;
 	public readonly id: number;
 	public readonly elem: HTMLElement;
@@ -34,8 +34,26 @@ class ModelPoint {
 		}
 	}
 
+	public disconnectFrom(other: ModelPoint): boolean {
+		if (this.connections.has(other.id)) {
+			this.connections.delete(other.id);
+			other.connections.delete(this.id);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public hasConnections(): boolean {
 		return this.connections.size > 0;
+	}
+
+	public getConnections(): Array<number> {
+		const result: Array<number> = [];
+		for (let id of this.connections) {
+			result.push(id);
+		}
+		return result;
 	}
 
 	public resetElemPos() {

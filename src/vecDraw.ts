@@ -22,6 +22,10 @@ class VecDraw {
 		this.gridCtx = gridCtx;
 	}
 
+	/**
+	 * Converts document position to model position
+	 * @param pos			global position as point
+	 */
 	public globalToModelPos(pos: Point): Point {
 		const x = Math.round((pos.x - this.canvasPos.x) / this.gridWidth);
 		const y = Math.round((pos.y - this.canvasPos.y) / this.gridHeight);
@@ -107,7 +111,34 @@ class VecDraw {
 		const current = new ModelPoint(this.templatePoint.x, this.templatePoint.y, this, this.currentColor, clone);
 		this.points.set(current.id, current);
 		return current;
-		//this.points.push(new ModelPoint(this.templatePoint.x, this.templatePoint.y, this.currentColor, clone));
+	}
+
+	public removeLine(fromId: number, toId: number) {
+		const lineId = ModelLine.makeId(fromId, toId);
+		if (this.lines.has(lineId)) {
+			this.lines.delete(lineId);
+			this.points.get(fromId).disconnectFrom(this.points.get(toId));
+			this.redrawLines();
+		}
+
+	}
+
+	public removePoint(pointId: number) {
+		const point = this.points.get(pointId);
+		let pointHadConnections = false;
+		if (point !== undefined) {
+			pointHadConnections = point.hasConnections();
+			for (const toId of point.getConnections()) {
+				point.disconnectFrom(this.points.get(toId));
+				this.lines.delete(ModelLine.makeId(point.id, toId));
+			}
+		}
+
+		this.points.delete(point.id);
+		point.elem.remove();
+		if (pointHadConnections) {
+			this.redrawLines();
+		}
 	}
 
 	public addLine(fromId: number, toId: number) {
