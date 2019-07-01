@@ -5,35 +5,43 @@ class VecDraw {
 	private gridCtx: CanvasRenderingContext2D;
 	public gridWidth: number;
 	public gridHeight: number;
-	private canvasLeft: number;
-	private canvasTop: number;
+	private canvasPos: Point;
 
 	private points: Map<number, ModelPoint>;
 	private lines: Map<string, ModelLine>;
 	private currentColor: string;
 
-	constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement, mainCtx: CanvasRenderingContext2D, gridCtx: CanvasRenderingContext2D, canvasLeft: number, canvasTop: number) {
+	constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement, mainCtx: CanvasRenderingContext2D, gridCtx: CanvasRenderingContext2D, canvasPos: Point) {
 		this.points = new Map();
 		this.lines = new Map();
 		this.currentColor = "white";
 		this.pointHolder = pointHolder;
-		this.templatePoint = new ModelPoint(0, 0, this.currentColor, pointTemplateElem);
+		this.templatePoint = new ModelPoint(0, 0, this, this.currentColor, pointTemplateElem);
 		this.mainCtx = mainCtx;
 		this.gridCtx = gridCtx;
-		this.canvasLeft = canvasLeft;
-		this.canvasTop = canvasTop;
+		this.canvasPos = canvasPos;
 	}
 
 	public attachToGrid(pos: Point): Point {
 
-		const canvasPos = new Point(this.canvasLeft, this.canvasTop);
-
-		pos = pos.sub(canvasPos);
+		pos = pos.sub(this.canvasPos);
 		pos.x = Math.round(pos.x / this.gridWidth) * this.gridWidth;
 		pos.y = Math.round(pos.y / this.gridHeight) * this.gridHeight;
 
-		return pos.add(canvasPos);
+		return pos.add(this.canvasPos);
 	}
+
+	/*public drawLine(ctx: CanvasRenderingContext2D, from: ModelPoint, to: ModelPoint) {
+		const grad = this.mainCtx.createLinearGradient(startPos.x, startPos.y, endPos.x, endPos.y);
+		grad.addColorStop(0, from.color);
+		grad.addColorStop(1, to.color);
+		this.mainCtx.strokeStyle = grad;
+
+		this.mainCtx.beginPath();
+		this.mainCtx.moveTo(line.from.x - this.canvasPos.x, line.from.y - this.canvasPos.y);
+		this.mainCtx.lineTo(line.to.x - this.canvasPos.x, line.to.y - this.canvasPos.y);
+		this.mainCtx.stroke();
+	}*/
 
 	public redrawGrid() {
 		this.gridCtx.clearRect(0, 0, 800, 600);
@@ -88,8 +96,8 @@ class VecDraw {
 			//const from = this.points.get(line.from.id);
 			//const to = this.points.get(line.to.id);
 
-			const startPos = new Point(line.from.x - this.canvasLeft, line.from.y - this.canvasTop);
-			const endPos = new Point(line.to.x - this.canvasLeft, line.to.y - this.canvasTop);
+			const startPos = new Point(line.from.x - this.canvasPos.x, line.from.y - this.canvasPos.y);
+			const endPos = new Point(line.to.x - this.canvasPos.x, line.to.y - this.canvasPos.y);
 
 			const grad = this.mainCtx.createLinearGradient(startPos.x, startPos.y, endPos.x, endPos.y);
 			grad.addColorStop(0, line.from.color);
@@ -97,8 +105,8 @@ class VecDraw {
 			this.mainCtx.strokeStyle = grad;
 
 			this.mainCtx.beginPath();
-			this.mainCtx.moveTo(line.from.x - this.canvasLeft, line.from.y - this.canvasTop);
-			this.mainCtx.lineTo(line.to.x - this.canvasLeft, line.to.y - this.canvasTop);
+			this.mainCtx.moveTo(line.from.x - this.canvasPos.x, line.from.y - this.canvasPos.y);
+			this.mainCtx.lineTo(line.to.x - this.canvasPos.x, line.to.y - this.canvasPos.y);
 			this.mainCtx.stroke();
 		}
 	}
@@ -113,7 +121,7 @@ class VecDraw {
 		const clone = <HTMLElement>this.templatePoint.elem.cloneNode(true);
 		clone.removeAttribute("id");
 		this.pointHolder.appendChild(clone);
-		const current = new ModelPoint(this.templatePoint.x, this.templatePoint.y, this.currentColor, clone);
+		const current = new ModelPoint(this.templatePoint.x, this.templatePoint.y, this, this.currentColor, clone);
 		this.points.set(current.id, current);
 		return current;
 		//this.points.push(new ModelPoint(this.templatePoint.x, this.templatePoint.y, this.currentColor, clone));
@@ -131,8 +139,8 @@ class VecDraw {
 			this.lines.set(line.id, line);
 
 			//TODO: add a function to draw a single line
-			const startPos = new Point(line.from.x - this.canvasLeft, line.from.y - this.canvasTop);
-			const endPos = new Point(line.to.x - this.canvasLeft, line.to.y - this.canvasTop);
+			const startPos = new Point(line.from.x - this.canvasPos.x, line.from.y - this.canvasPos.y);
+			const endPos = new Point(line.to.x - this.canvasPos.x, line.to.y - this.canvasPos.y);
 
 			const grad = this.mainCtx.createLinearGradient(startPos.x, startPos.y, endPos.x, endPos.y);
 			grad.addColorStop(0, line.from.color);
@@ -140,8 +148,8 @@ class VecDraw {
 			this.mainCtx.strokeStyle = grad;
 
 			this.mainCtx.beginPath();
-			this.mainCtx.moveTo(line.from.x - this.canvasLeft, line.from.y - this.canvasTop);
-			this.mainCtx.lineTo(line.to.x - this.canvasLeft, line.to.y - this.canvasTop);
+			this.mainCtx.moveTo(line.from.x - this.canvasPos.x, line.from.y - this.canvasPos.y);
+			this.mainCtx.lineTo(line.to.x - this.canvasPos.x, line.to.y - this.canvasPos.y);
 			this.mainCtx.stroke();
 		} else {
 			throw `Either ${fromId} or ${toId} is an invalid point ID`;
@@ -166,95 +174,5 @@ class VecDraw {
 		this.points.get(id).pos = this.attachToGrid(pos);
 		this.points.get(id).resetElemPos();
 		this.redrawLines();
-	}
-}
-
-class ModelLine {
-	readonly from: ModelPoint;
-	readonly to: ModelPoint;
-	readonly id: string;
-
-	public static makeId(fromId: number, toId: number): string {
-		//line goes from lower to higher id point
-		if (toId < fromId) {
-			let temp = fromId;
-			fromId = toId;
-			toId = temp;
-		}
-
-		return `${fromId}->${toId}`;
-	}
-
-	constructor(from: ModelPoint, to: ModelPoint) {
-		if (to.id < from.id) {
-			let temp = from;
-			from = to;
-			to = temp;
-		}
-
-		this.from = from;
-		this.to = to;
-		//TODO: eliminate double swap of to and from
-		this.id = ModelLine.makeId(from.id, to.id);
-	}
-}
-
-class ModelPoint {
-
-	static readonly radius = 5;
-	static readonly radius2 = ModelPoint.radius * ModelPoint.radius;
-	private static count: number = -1;
-
-	public pos: Point;
-	private connections: Array<ModelPoint>;
-	private _color: string;
-	readonly id: number;
-	readonly elem: HTMLElement;
-
-	constructor(x: number, y: number, color: string, elem: HTMLElement) {
-		this.pos = new Point(x, y);
-		this.connections = [];
-		this.id = ModelPoint.count++;
-		this.elem = elem;
-		this.color = color;
-		this.resetElemPos();
-	}
-
-	public containsPoint(x: number, y: number): boolean {
-		let dx = this.x - x;
-		let dy = this.y - y;
-		return dx * dx + dy * dy < ModelPoint.radius2;
-	}
-
-	public connectTo(other: ModelPoint) {
-		if (other.id < this.id) {
-			other.connectTo(this);
-		} else {
-			this.connections.push(other);
-		}
-	}
-
-	public resetElemPos() {
-		this.elem.setAttribute("style", `left: ${this.pos.x - ModelPoint.radius}px; top: ${this.pos.y - ModelPoint.radius}px`);
-	}
-
-	//GETTERS AND SETTERS
-	set color(color: string) {
-		this._color = color;
-		this.elem.querySelector(".innerCircle").setAttribute("fill", color);
-	}
-	get color(): string {
-		return this._color;
-	}
-	get x(): number { return this.pos.x; }
-	set x(x: number) {
-		this.pos.x = x;
-		this.resetElemPos();
-	}
-
-	get y(): number { return this.pos.y; }
-	set y(y: number) {
-		this.pos.y = y;
-		this.resetElemPos();
 	}
 }

@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	const gridCanvas = <HTMLCanvasElement>document.getElementById("gridCanvas");
 	gridCanvas.setAttribute("style", `left: ${mainRect.left}px; top: ${mainRect.top}px`);
 
-	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCtx, gridCanvas.getContext("2d"), mainRect.left, mainRect.top);
+	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCtx, gridCanvas.getContext("2d"), new Point(mainRect.left, mainRect.top));
 	vecDraw.gridWidth = 20;
 	vecDraw.gridHeight = 20;
 	vecDraw.redrawGrid();
