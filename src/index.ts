@@ -2,6 +2,7 @@ let currentMode: Mode;
 let modes: Map<string, Mode>;
 
 let vecDraw: VecDraw;
+let mainRect: ClientRect | DOMRect;
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -9,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	const pointHolder = document.getElementById("pointHolder");
 
 	const mainCanvas = <HTMLCanvasElement>document.getElementById("mainCanvas");
-	const mainRect = mainCanvas.getBoundingClientRect();
+	mainRect = mainCanvas.getBoundingClientRect();
 	const mainCtx = mainCanvas.getContext("2d");
 	mainCtx.lineWidth = 2;
 
@@ -23,9 +24,16 @@ document.addEventListener("DOMContentLoaded", () => {
 	gridCanvas.setAttribute("style", `left: ${mainRect.left}px; top: ${mainRect.top}px`);
 
 	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCtx, gridCanvas.getContext("2d"), new Point(mainRect.left, mainRect.top));
-	vecDraw.gridWidth = 20;
-	vecDraw.gridHeight = 20;
+	vecDraw.gridWidth = 10;
+	vecDraw.gridHeight = 10;
 	vecDraw.redrawGrid();
+
+	//export model
+	const exportBtn = document.getElementById("exportBtn");
+	const jsonArea = <HTMLTextAreaElement>document.getElementById("jsonArea");
+	exportBtn.addEventListener("click", function () {
+		jsonArea.value = vecDraw.toString();
+	});
 
 	modes = new Map();
 	modes.set("a", new AddPointMode(vecDraw));
@@ -48,13 +56,19 @@ document.addEventListener("keyup", (e: KeyboardEvent) => {
 });
 
 document.addEventListener("mousemove", (e: MouseEvent) => {
-	currentMode.onMouseMove(e);
+	if (e.x >= mainRect.left && e.x < mainRect.right && e.y >= mainRect.top && e.y < mainRect.bottom) {
+		currentMode.onMouseMove(e);
+	}
 });
 
 document.addEventListener("mouseup", (e: MouseEvent) => {
-	currentMode.onMouseUp(e);
+	if (e.x >= mainRect.left && e.x < mainRect.right && e.y >= mainRect.top && e.y < mainRect.bottom) {
+		currentMode.onMouseUp(e);
+	}
 });
 
 document.addEventListener("mousedown", (e: MouseEvent) => {
-	currentMode.onMouseDown(e);
+	if (e.x >= mainRect.left && e.x < mainRect.right && e.y >= mainRect.top && e.y < mainRect.bottom) {
+		currentMode.onMouseDown(e);
+	}
 });

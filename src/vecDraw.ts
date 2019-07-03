@@ -22,6 +22,33 @@ class VecDraw {
 		this.gridCtx = gridCtx;
 	}
 
+	public toString(): string {
+		let pointMap: Map<number, number> = new Map<number, number>();
+
+		let pointArray: Array<{ x: number, y: number, color: string }> = [];
+		let lineArray: Array<{ from: number, to: number }> = [];
+
+		let i = 0;
+		for (const entry of this.points) {
+			pointArray.push({
+				x: entry[1].x,
+				y: entry[1].y,
+				color: entry[1].color
+			});
+			pointMap.set(entry[0], i);
+			i++;
+		}
+
+		for (const entry of this.lines) {
+			lineArray.push({
+				from: pointMap.get(entry[1].from.id),
+				to: pointMap.get(entry[1].to.id)
+			});
+		}
+
+		return JSON.stringify({ points: pointArray, lines: lineArray }, null, 4);
+	}
+
 	/**
 	 * Converts document position to model position
 	 * @param pos			global position as point

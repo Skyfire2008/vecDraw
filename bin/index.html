@@ -8,7 +8,7 @@
 
 <style>
 	svg {
-		position: fixed
+		position: fixed;
 	}
 
 	#tempCanvas {
@@ -19,9 +19,16 @@
 		position: absolute;
 		z-index: -1;
 	}
+
+	#jsonArea {
+		width: 400px;
+		height: 600px;
+		background-color: darkblue;
+		color: orange;
+	}
 </style>
 
-<body style="background-color: darkslateblue">
+<body style="background-color: darkblue">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
@@ -29,12 +36,15 @@
 	<canvas id="mainCanvas" width="800" height="600"></canvas>
 	<canvas id="tempCanvas" width="800" height="600"></canvas>
 	<canvas id="gridCanvas" width="800" height="600"></canvas>
+	<textarea rows="5" columns="400" id="jsonArea"></textarea>
 	<div id="pointHolder"></div>
 	<svg id="pointTemplate" width="10" height="10">
 		<circle cx="5" cy="5" r="4" fill="black" stroke="white" stroke-width="1"></circle>
 		<circle class="innerCircle" cx="5" cy="5" r="2" fill="white"></circle>
 	</svg>
 	<input type="color" id="colorPicker" value="#ffffff" hidden></input>
+	<br />
+	<button id="exportBtn">Export</button>
 </body>
 
 </html>
