@@ -75,14 +75,14 @@ class AddConnectedPointMode extends AbstractMode {
 	onEnable(): void { }
 	onDisable(): void {
 		this.prevPoint = null;
-		this.tempCtx.clearRect(0, 0, 800, 600);
+		this.tempCtx.clearRect(0, 0, this.owner.canvasSize.x, this.owner.canvasSize.y);
 		this.owner.resetTemplatePoint();
 	}
 
 	onMouseMove(e: MouseEvent): void {
 		this.owner.moveTemplatePoint(e.x, e.y);
 		if (this.prevPoint !== null) {
-			this.tempCtx.clearRect(0, 0, 800, 600);
+			this.tempCtx.clearRect(0, 0, this.owner.canvasSize.x, this.owner.canvasSize.y);
 			this.owner.drawLine(this.tempCtx, this.prevPoint, this.owner.templatePoint);
 		}
 	}
@@ -169,7 +169,7 @@ class ConnectPointsMode extends AbstractMode {
 				this.to = this.owner.pointAt(e.x, e.y);
 				//if "to" is found, draw the line once
 				if (this.to !== null) {
-					this.tempCtx.clearRect(0, 0, 800, 600);
+					this.tempCtx.clearRect(0, 0, this.owner.canvasSize.x, this.owner.canvasSize.y);
 					this.owner.drawLine(this.tempCtx, this.from, this.to);
 				}
 
@@ -180,7 +180,7 @@ class ConnectPointsMode extends AbstractMode {
 
 			//only if not connected to "to", draw the line to mouse
 			if (this.to === null) {
-				this.tempCtx.clearRect(0, 0, 800, 600);
+				this.tempCtx.clearRect(0, 0, this.owner.canvasSize.x, this.owner.canvasSize.y);
 				this.tempCtx.strokeStyle = "white";
 				this.tempCtx.beginPath();
 				this.tempCtx.moveTo(this.from.canvasPos.x, this.from.canvasPos.y);
@@ -196,7 +196,7 @@ class ConnectPointsMode extends AbstractMode {
 		if (this.from !== null && this.to !== null) {
 			this.owner.addLine(this.from.id, this.to.id);
 		}
-		this.tempCtx.clearRect(0, 0, 800, 600);
+		this.tempCtx.clearRect(0, 0, this.owner.canvasSize.x, this.owner.canvasSize.y);
 		this.from = null;
 		this.to = null;
 	}

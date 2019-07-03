@@ -5,21 +5,29 @@ class VecDraw {
 	private gridCtx: CanvasRenderingContext2D;
 	public gridWidth: number;
 	public gridHeight: number;
+	public center: Point;
 	public readonly canvasPos: Point;
+	public readonly canvasSize: Point;
 
 	private points: Map<number, ModelPoint>;
 	private lines: Map<string, ModelLine>;
 	private currentColor: string;
 
-	constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement, mainCtx: CanvasRenderingContext2D, gridCtx: CanvasRenderingContext2D, canvasPos: Point) {
+	constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement, mainCtx: CanvasRenderingContext2D, gridCtx: CanvasRenderingContext2D, canvasSize: Point, canvasPos: Point, gridSize: Point) {
 		this.points = new Map();
 		this.lines = new Map();
 		this.currentColor = "#ffffff";
 		this.pointHolder = pointHolder;
 		this.canvasPos = canvasPos;
-		this.templatePoint = new ModelPoint(0, 0, this, this.currentColor, pointTemplateElem);
+		this.canvasSize = canvasSize;
 		this.mainCtx = mainCtx;
 		this.gridCtx = gridCtx;
+
+		this.gridWidth = gridSize.x;
+		this.gridHeight = gridSize.y;
+
+		this.center = new Point(Math.round(canvasSize.x / (2 * this.gridWidth)), Math.round(canvasSize.y / (2 * this.gridHeight)));
+		this.templatePoint = new ModelPoint(0, 0, this, this.currentColor, pointTemplateElem);
 	}
 
 	public toString(): string {
@@ -56,7 +64,7 @@ class VecDraw {
 	public globalToModelPos(pos: Point): Point {
 		const x = Math.round((pos.x - this.canvasPos.x) / this.gridWidth);
 		const y = Math.round((pos.y - this.canvasPos.y) / this.gridHeight);
-		return new Point(x, y);
+		return new Point(x, y).sub(this.center);
 	}
 
 	public drawLine(ctx: CanvasRenderingContext2D, from: ModelPoint, to: ModelPoint) {
@@ -72,41 +80,41 @@ class VecDraw {
 	}
 
 	public redrawGrid() {
-		this.gridCtx.clearRect(0, 0, 800, 600);
+		this.gridCtx.clearRect(0, 0, this.canvasSize.x, this.canvasSize.y);
 		this.gridCtx.strokeStyle = "#ff8800";
 
-		let x = 400;
+		let x = 0;
 		this.gridCtx.beginPath();
-		while (x <= 800) {
+		while (x <= this.canvasSize.x) {
 			let foo = Math.floor(x) + 0.5;
 			this.gridCtx.moveTo(foo, 0);
-			this.gridCtx.lineTo(foo, 600);
+			this.gridCtx.lineTo(foo, this.canvasSize.y);
 			x += this.gridWidth;
 		}
 
-		x = 400;
-		while (x >= 0) {
-			let foo = Math.floor(x) + 0.5;
-			this.gridCtx.moveTo(foo, 0);
-			this.gridCtx.lineTo(foo, 600);
-			x -= this.gridWidth;
-		}
-
-		let y = 300;
-		while (y <= 600) {
+		let y = 0;
+		while (y <= this.canvasSize.y) {
 			let foo = Math.floor(y) + 0.5;
 			this.gridCtx.moveTo(0, foo);
-			this.gridCtx.lineTo(800, foo);
+			this.gridCtx.lineTo(this.canvasSize.x, foo);
 			y += this.gridHeight;
 		}
 
-		y = 300;
-		while (y >= 0) {
-			let foo = Math.floor(y) + 0.5;
-			this.gridCtx.moveTo(0, foo);
-			this.gridCtx.lineTo(800, foo);
-			y -= this.gridHeight;
-		}
+		this.gridCtx.closePath();
+		this.gridCtx.stroke();
+
+		this.gridCtx.lineWidth = 2;
+		this.gridCtx.strokeStyle = "#ffff00";
+		this.gridCtx.beginPath();
+
+		let foo = this.center.x * this.gridWidth;
+		let bar = this.center.y * this.gridHeight;
+		this.gridCtx.moveTo(foo, 0);
+		this.gridCtx.lineTo(foo, this.canvasSize.y);
+		this.gridCtx.moveTo(0, bar);
+		this.gridCtx.lineTo(this.canvasSize.x, bar);
+
+		this.gridCtx.closePath();
 		this.gridCtx.stroke();
 	}
 
@@ -119,7 +127,7 @@ class VecDraw {
 	}
 
 	public redrawLines() {
-		this.mainCtx.clearRect(0, 0, 800, 600);
+		this.mainCtx.clearRect(0, 0, this.canvasSize.x, this.canvasSize.y);
 		for (const line of this.lines.values()) {
 			this.drawLine(this.mainCtx, line.from, line.to);
 		}

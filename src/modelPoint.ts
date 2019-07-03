@@ -57,15 +57,15 @@ class ModelPoint {
 	}
 
 	public resetElemPos() {
-		const x = this.pos.x * this.owner.gridWidth - ModelPoint.radius + this.owner.canvasPos.x;
-		const y = this.pos.y * this.owner.gridHeight - ModelPoint.radius + this.owner.canvasPos.y;
+		const x = (this.pos.x + this.owner.center.x) * this.owner.gridWidth - ModelPoint.radius + this.owner.canvasPos.x;
+		const y = (this.pos.y + this.owner.center.y) * this.owner.gridHeight - ModelPoint.radius + this.owner.canvasPos.y;
 		this.elem.setAttribute("style", `left: ${x}px; top: ${y}px`);
 	}
 
 	//GETTERS AND SETTERS
 	get canvasPos(): Point {
-		const x = this.pos.x * this.owner.gridWidth;
-		const y = this.pos.y * this.owner.gridHeight;
+		const x = (this.pos.x + this.owner.center.x) * this.owner.gridWidth;
+		const y = (this.pos.y + this.owner.center.y) * this.owner.gridHeight;
 		return new Point(x, y);
 	}
 
