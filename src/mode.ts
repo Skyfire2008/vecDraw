@@ -21,6 +21,60 @@ abstract class AbstractMode implements Mode {
 	abstract onMouseUp(e: MouseEvent): void;
 }
 
+class SelectMode extends AbstractMode {
+
+	private xInput: HTMLInputElement;
+	private yInput: HTMLInputElement;
+	private colorPicker: HTMLInputElement;
+	private doc: Document;
+
+	private selection: ModelPoint = null;
+
+	constructor(vecDraw: VecDraw, doc: Document, xInput: HTMLInputElement, yInput: HTMLInputElement, colorPicker: HTMLInputElement) {
+		super(vecDraw);
+		this.doc = doc;
+		this.xInput = xInput;
+		this.yInput = yInput;
+		this.colorPicker = colorPicker;
+
+		xInput.addEventListener("input", (e: Event) => {
+			//TODO: one single function for all changes
+			if (this.selection !== null) {
+				this.selection.pos.x = parseFloat(this.xInput.value);
+			}
+		});
+
+		yInput.addEventListener("input", (e: Event) => {
+			if (this.selection !== null) {
+				this.selection.pos.y = parseFloat(this.yInput.value);
+			}
+		});
+	}
+
+	private onKeyDown(e: KeyboardEvent) {
+		//TODO: implement me!
+	}
+
+	onEnable(): void {
+		//attach event listeners
+		this.doc.addEventListener("keydown", this.onKeyDown);
+	}
+	onDisable(): void {
+		throw new Error("Method not implemented.");
+	}
+	onMouseMove(e: MouseEvent): void {
+		throw new Error("Method not implemented.");
+	}
+	onMouseDown(e: MouseEvent): void {
+		throw new Error("Method not implemented.");
+	}
+	onMouseUp(e: MouseEvent): void {
+		throw new Error("Method not implemented.");
+	}
+
+
+}
+
 class DeleteMode extends AbstractMode {
 
 	private from: ModelPoint;

@@ -26,6 +26,10 @@
 		background-color: darkblue;
 		color: orange;
 	}
+
+	label {
+		color: orange;
+	}
 </style>
 
 <body style="background-color: darkblue">
@@ -42,7 +46,13 @@
 		<circle cx="5" cy="5" r="4" fill="black" stroke="white" stroke-width="1"></circle>
 		<circle class="innerCircle" cx="5" cy="5" r="2" fill="white"></circle>
 	</svg>
-	<input type="color" id="colorPicker" value="#ffffff" hidden></input>
+	<br />
+	<label for="xInput">x:</label>
+	<input type="number" id="xInput" />
+	<label for="yInput">y:</label>
+	<input type="number" id=yInput />
+	<label for="colorPicker">color:</label>
+	<input type="color" id="colorPicker" value="#ffffff"></input>
 	<br />
 	<button id="exportBtn">Export</button>
 </body>

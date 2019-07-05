@@ -33,28 +33,24 @@ class VecDraw {
 	public toString(): string {
 		let pointMap: Map<number, number> = new Map<number, number>();
 
-		let pointArray: Array<{ x: number, y: number, color: string }> = [];
-		let lineArray: Array<{ from: number, to: number }> = [];
+		let pointStr = "";
+		let lineStr = "";
 
 		let i = 0;
 		for (const entry of this.points) {
-			pointArray.push({
-				x: entry[1].x,
-				y: entry[1].y,
-				color: entry[1].color
-			});
+			pointStr += `    {"x": ${entry[1].x}, "y": ${entry[1].y}, "color": "${entry[1].color}"},\n`;
 			pointMap.set(entry[0], i);
 			i++;
 		}
+		pointStr = pointStr.substring(0, pointStr.length - 2) + "\n";
 
 		for (const entry of this.lines) {
-			lineArray.push({
-				from: pointMap.get(entry[1].from.id),
-				to: pointMap.get(entry[1].to.id)
-			});
+			lineStr += `    {"from": ${pointMap.get(entry[1].from.id)}, "to": ${pointMap.get(entry[1].to.id)}},\n`;
 		}
+		lineStr = lineStr.substring(0, lineStr.length - 2) + "\n";
 
-		return JSON.stringify({ points: pointArray, lines: lineArray }, null, 4);
+		//no JSON.stringify is used to enforce custom formatting
+		return `{\n  "points": [\n${pointStr}  ],"lines": [\n${lineStr}]}`;
 	}
 
 	/**
