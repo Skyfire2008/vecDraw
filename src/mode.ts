@@ -38,21 +38,62 @@ class SelectMode extends AbstractMode {
 		this.colorPicker = colorPicker;
 
 		xInput.addEventListener("input", (e: Event) => {
-			//TODO: one single function for all changes
 			if (this.selection !== null) {
 				this.selection.pos.x = parseFloat(this.xInput.value);
+				this.redraw();
 			}
 		});
 
 		yInput.addEventListener("input", (e: Event) => {
 			if (this.selection !== null) {
 				this.selection.pos.y = parseFloat(this.yInput.value);
+				this.redraw();
+			}
+		});
+
+		colorPicker.addEventListener("change", (e: Event) => {
+			if (this.selection !== null) {
+				this.selection.color = (<HTMLInputElement>e.target).value;
+				this.redraw();
 			}
 		});
 	}
 
-	private onKeyDown(e: KeyboardEvent) {
-		//TODO: implement me!
+	private redraw() {
+		this.selection.resetElemPos();
+		if (this.selection.hasConnections()) {
+			this.owner.redrawLines();
+		}
+	}
+
+	private onKeyDown = (e: KeyboardEvent) => {
+		if (this.selection !== null) {
+			let posChanged = false;
+			switch (e.keyCode) {
+				case 37:
+					this.selection.x -= 1 / this.owner.gridWidth;
+					posChanged = true;
+					break;
+				case 38:
+					this.selection.y -= 1 / this.owner.gridHeight;
+					posChanged = true;
+					break;
+				case 39:
+					this.selection.x += 1 / this.owner.gridWidth;
+					posChanged = true;
+					break;
+				case 40:
+					this.selection.y += 1 / this.owner.gridHeight;
+					posChanged = true;
+					break;
+			}
+
+			if (posChanged) {
+				this.xInput.value = "" + this.selection.x;
+				this.yInput.value = "" + this.selection.y;
+				this.redraw();
+			}
+		}
 	}
 
 	onEnable(): void {
@@ -60,19 +101,22 @@ class SelectMode extends AbstractMode {
 		this.doc.addEventListener("keydown", this.onKeyDown);
 	}
 	onDisable(): void {
-		throw new Error("Method not implemented.");
+		this.selection = null;
+		this.doc.removeEventListener("keydown", this.onKeyDown);
 	}
 	onMouseMove(e: MouseEvent): void {
-		throw new Error("Method not implemented.");
 	}
 	onMouseDown(e: MouseEvent): void {
-		throw new Error("Method not implemented.");
+		this.selection = this.owner.pointAt(e.x, e.y);
+		if (this.selection !== null) {
+			this.xInput.value = "" + this.selection.x;
+			this.yInput.value = "" + this.selection.y;
+			this.colorPicker.setAttribute("value", this.selection.color);
+			this.colorPicker.value = this.colorPicker.defaultValue;
+		}
 	}
 	onMouseUp(e: MouseEvent): void {
-		throw new Error("Method not implemented.");
 	}
-
-
 }
 
 class DeleteMode extends AbstractMode {
@@ -157,39 +201,6 @@ class AddConnectedPointMode extends AbstractMode {
 			this.owner.setCurrentColor(this.prevPoint.color);
 		}
 	}
-}
-
-class PointColorMode extends AbstractMode {
-
-	private colorPicker: HTMLInputElement;
-	private point: ModelPoint = null;
-
-	constructor(vecDraw: VecDraw, colorPicker: HTMLInputElement) {
-		super(vecDraw);
-		this.colorPicker = colorPicker;
-		colorPicker.addEventListener("change", (e: Event) => {
-			this.point.color = (<HTMLInputElement>e.target).value;
-			if (this.point.hasConnections()) {
-				this.owner.redrawLines();
-			}
-		});
-	}
-
-	onEnable(): void {
-	}
-	onDisable(): void {
-	}
-	onMouseMove(e: MouseEvent): void {
-	}
-	onMouseDown(e: MouseEvent): void {
-	}
-	onMouseUp(e: MouseEvent): void {
-		this.point = this.owner.pointAt(e.x, e.y);
-		if (this.point !== null) {
-			this.colorPicker.click();
-		}
-	}
-
 }
 
 class ConnectPointsMode extends AbstractMode {

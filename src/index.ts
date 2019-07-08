@@ -23,6 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
 	const gridCanvas = <HTMLCanvasElement>document.getElementById("gridCanvas");
 	gridCanvas.setAttribute("style", `left: ${mainRect.left}px; top: ${mainRect.top}px`);
 
+	const xInput = <HTMLInputElement>document.getElementById("xInput");
+	const yInput = <HTMLInputElement>document.getElementById("yInput");
+	const colorPicker = <HTMLInputElement>document.getElementById("colorPicker");
+
 	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCtx, gridCanvas.getContext("2d"), new Point(mainRect.width, mainRect.height), new Point(mainRect.left, mainRect.top), new Point(16, 16));
 	vecDraw.redrawGrid();
 
@@ -37,9 +41,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	modes.set("a", new AddPointMode(vecDraw));
 	modes.set("m", new MovePointMode(vecDraw));
 	modes.set("l", new ConnectPointsMode(vecDraw, tempCtx, mainRect.left, mainRect.top));
-	modes.set("c", new PointColorMode(vecDraw, <HTMLInputElement>document.getElementById("colorPicker")));
 	modes.set("b", new AddConnectedPointMode(vecDraw, tempCtx, mainRect.left, mainRect.top));
 	modes.set("d", new DeleteMode(vecDraw));
+	modes.set("s", new SelectMode(vecDraw, document, xInput, yInput, colorPicker));
 	currentMode = new DummyMode();
 });
 
