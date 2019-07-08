@@ -55,6 +55,9 @@ class SelectMode extends AbstractMode {
 			if (this.selection !== null) {
 				this.selection.color = (<HTMLInputElement>e.target).value;
 				this.redraw();
+			} else {
+				//FIXME: setting listener for current color shouldn't be this class'es responsibility
+				this.owner.setCurrentColor((<HTMLInputElement>e.target).value);
 			}
 		});
 	}
@@ -70,19 +73,19 @@ class SelectMode extends AbstractMode {
 		if (this.selection !== null) {
 			let posChanged = false;
 			switch (e.keyCode) {
-				case 37:
+				case 37: //left
 					this.selection.x -= 1 / this.owner.gridWidth;
 					posChanged = true;
 					break;
-				case 38:
+				case 38: //up
 					this.selection.y -= 1 / this.owner.gridHeight;
 					posChanged = true;
 					break;
-				case 39:
+				case 39: //right
 					this.selection.x += 1 / this.owner.gridWidth;
 					posChanged = true;
 					break;
-				case 40:
+				case 40: //down
 					this.selection.y += 1 / this.owner.gridHeight;
 					posChanged = true;
 					break;
@@ -97,12 +100,13 @@ class SelectMode extends AbstractMode {
 	}
 
 	onEnable(): void {
-		//attach event listeners
 		this.doc.addEventListener("keydown", this.onKeyDown);
 	}
 	onDisable(): void {
 		this.selection = null;
 		this.doc.removeEventListener("keydown", this.onKeyDown);
+		this.colorPicker.setAttribute("value", this.owner.getCurrentColor());
+		this.colorPicker.value = this.colorPicker.defaultValue;
 	}
 	onMouseMove(e: MouseEvent): void {
 	}
@@ -112,6 +116,9 @@ class SelectMode extends AbstractMode {
 			this.xInput.value = "" + this.selection.x;
 			this.yInput.value = "" + this.selection.y;
 			this.colorPicker.setAttribute("value", this.selection.color);
+			this.colorPicker.value = this.colorPicker.defaultValue;
+		} else {
+			this.colorPicker.setAttribute("value", this.owner.getCurrentColor());
 			this.colorPicker.value = this.colorPicker.defaultValue;
 		}
 	}
@@ -158,6 +165,7 @@ class DeleteMode extends AbstractMode {
 
 class AddConnectedPointMode extends AbstractMode {
 	private prevPoint: ModelPoint;
+	private nextPoint: ModelPoint;
 	private tempCtx: CanvasRenderingContext2D;
 	private canvasLeft: number;
 	private canvasTop: number;
@@ -165,6 +173,7 @@ class AddConnectedPointMode extends AbstractMode {
 	constructor(vecDraw: VecDraw, tempCtx: CanvasRenderingContext2D, canvasLeft: number, canvasTop: number) {
 		super(vecDraw);
 		this.prevPoint = null;
+		this.nextPoint = null;
 		this.tempCtx = tempCtx;
 		this.canvasLeft = canvasLeft;
 		this.canvasTop = canvasTop;
@@ -178,15 +187,39 @@ class AddConnectedPointMode extends AbstractMode {
 	}
 
 	onMouseMove(e: MouseEvent): void {
-		this.owner.moveTemplatePoint(e.x, e.y);
+
+		if (this.nextPoint === null) {
+			this.owner.moveTemplatePoint(e.x, e.y);
+		}
+
 		if (this.prevPoint !== null) {
-			this.tempCtx.clearRect(0, 0, this.owner.canvasSize.x, this.owner.canvasSize.y);
-			this.owner.drawLine(this.tempCtx, this.prevPoint, this.owner.templatePoint);
+
+			//if next point not found...
+			if (this.nextPoint === null) {
+
+				this.nextPoint = this.owner.pointAt(e.x, e.y);
+				this.tempCtx.clearRect(0, 0, this.owner.canvasSize.x, this.owner.canvasSize.y);
+				if (this.nextPoint === null) { //if found, draw line to next point
+					this.owner.drawLine(this.tempCtx, this.prevPoint, this.owner.templatePoint);
+				} else {
+					this.owner.drawLine(this.tempCtx, this.prevPoint, this.nextPoint);
+					this.owner.resetTemplatePoint();
+				}
+			} else { //otherwise check that mouse still above next point
+				if (this.nextPoint.globalPos.distance(new Point(e.x, e.y)) > ModelPoint.radius) {
+					this.nextPoint = null;
+				}
+			}
 		}
 	}
 
 	onMouseUp(e: MouseEvent): void {
-		const newPoint = this.owner.addPoint();
+
+		let newPoint = this.nextPoint;
+
+		if (newPoint === null) {
+			newPoint = this.owner.addPoint();
+		}
 		if (this.prevPoint !== null) {
 			this.owner.addLine(this.prevPoint.id, newPoint.id);
 		}
@@ -195,10 +228,11 @@ class AddConnectedPointMode extends AbstractMode {
 	}
 
 	onMouseDown(e: MouseEvent): void {
-		const foo = this.owner.pointAt(e.x, e.y);
-		if (foo !== null) {
-			this.prevPoint = foo;
-			this.owner.setCurrentColor(this.prevPoint.color);
+		if (this.nextPoint === null) { //if next point not null, prev point is also not null, no need to find it
+			const foo = this.owner.pointAt(e.x, e.y);
+			if (foo !== null) {
+				this.prevPoint = foo;
+			}
 		}
 	}
 }

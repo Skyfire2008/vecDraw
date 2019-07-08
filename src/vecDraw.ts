@@ -120,6 +120,11 @@ class VecDraw {
 
 	public setCurrentColor(color: string) {
 		this.currentColor = color;
+		this.templatePoint.color = color;
+	}
+
+	public getCurrentColor(): string {
+		return this.currentColor;
 	}
 
 	public redrawLines() {
@@ -175,7 +180,7 @@ class VecDraw {
 	public addLine(fromId: number, toId: number) {
 		let to = this.points.get(toId);
 		let from = this.points.get(fromId);
-		if (to !== undefined && from !== undefined) {
+		if (to !== undefined && from !== undefined && to.id !== from.id) {
 
 			to.connectTo(from);
 			from.connectTo(to);
@@ -184,8 +189,6 @@ class VecDraw {
 			this.lines.set(line.id, line);
 
 			this.drawLine(this.mainCtx, to, from);
-		} else {
-			throw `Either ${fromId} or ${toId} is an invalid point ID`;
 		}
 	}
 
