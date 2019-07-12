@@ -30,6 +30,29 @@
 	label {
 		color: orange;
 	}
+
+	@keyframes circle {
+		0% {
+			fill: black;
+			stroke: white;
+		}
+
+		50% {
+			fill: white;
+			stroke: black;
+		}
+
+		100% {
+			fill: black;
+			stroke: white;
+		}
+	}
+
+	.selection {
+		animation-name: circle;
+		animation-duration: 1s;
+		animation-iteration-count: infinite;
+	}
 </style>
 
 <body style="background-color: darkblue">

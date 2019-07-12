@@ -21,6 +21,26 @@ abstract class AbstractMode implements Mode {
 	abstract onMouseUp(e: MouseEvent): void;
 }
 
+class MultiSelectMode extends AbstractMode {
+	onEnable(): void {
+		throw new Error("Method not implemented.");
+	}
+	onDisable(): void {
+		throw new Error("Method not implemented.");
+	}
+	onMouseMove(e: MouseEvent): void {
+		throw new Error("Method not implemented.");
+	}
+	onMouseDown(e: MouseEvent): void {
+		throw new Error("Method not implemented.");
+	}
+	onMouseUp(e: MouseEvent): void {
+		throw new Error("Method not implemented.");
+	}
+
+
+}
+
 class SelectMode extends AbstractMode {
 
 	private xInput: HTMLInputElement;
