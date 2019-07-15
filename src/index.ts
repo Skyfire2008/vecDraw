@@ -61,17 +61,23 @@ document.addEventListener("keyup", (e: KeyboardEvent) => {
 document.addEventListener("mousemove", (e: MouseEvent) => {
 	if (e.x >= mainRect.left && e.x < mainRect.right && e.y >= mainRect.top && e.y < mainRect.bottom) {
 		currentMode.onMouseMove(e);
+		e.preventDefault();
+		e.stopPropagation();
 	}
 });
 
 document.addEventListener("mouseup", (e: MouseEvent) => {
 	if (e.x >= mainRect.left && e.x < mainRect.right && e.y >= mainRect.top && e.y < mainRect.bottom) {
 		currentMode.onMouseUp(e);
+		e.preventDefault();
+		e.stopPropagation();
 	}
 });
 
 document.addEventListener("mousedown", (e: MouseEvent) => {
 	if (e.x >= mainRect.left && e.x < mainRect.right && e.y >= mainRect.top && e.y < mainRect.bottom) {
 		currentMode.onMouseDown(e);
+		e.preventDefault();
+		e.stopPropagation();
 	}
 });

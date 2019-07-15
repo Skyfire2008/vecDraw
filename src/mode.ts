@@ -51,6 +51,7 @@ class MultiSelectMode extends AbstractMode {
 
 	onEnable(): void {
 		//this.tempCtx.lineWidth = 1;
+		this.tempCtx.strokeStyle = "white";
 	}
 	onDisable(): void {
 		this.mode = null;
@@ -103,15 +104,17 @@ class MultiSelectMode extends AbstractMode {
 					}
 				});
 			} else { //otherwise, overwrite points map
-				for (const point of this.selection.values()) {
-					point.deselect();
-				}
+				window.requestAnimationFrame(() => {
+					for (const point of this.selection.values()) {
+						point.deselect();
+					}
 
-				this.selection.clear();
-				for (const point of points) {
-					this.selection.set(point.id, point);
-					point.select();
-				}
+					this.selection.clear();
+					for (const point of points) {
+						this.selection.set(point.id, point);
+						point.select();
+					}
+				});
 			}
 
 			for (const point of points) {
