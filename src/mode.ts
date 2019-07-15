@@ -37,12 +37,16 @@ class MultiSelectMode extends AbstractMode {
 
 	private startPos: Point;
 
+	private selection: Map<number, ModelPoint>;
+
 	constructor(vecDraw: VecDraw, tempCtx: CanvasRenderingContext2D) {
 		super(vecDraw);
 		this.tempCtx = tempCtx;
 		this.mode = null;
 
 		this.startPos = null;
+
+		this.selection = new Map<number, ModelPoint>();
 	}
 
 	onEnable(): void {
@@ -51,16 +55,23 @@ class MultiSelectMode extends AbstractMode {
 	onDisable(): void {
 		this.mode = null;
 		this.clearCtx(this.tempCtx);
+		for (const point of this.selection.values()) {
+			point.deselect();
+		}
+		this.selection.clear();
 		//this.tempCtx.lineWidth = 2;
 	}
 	onMouseMove(e: MouseEvent): void {
 
 		if (this.mode === MSModeMode.select) {
-			let endPos = new Point(e.x, e.y).sub(this.owner.canvasPos)/*.add(new Point(0.5, 0.5))*/;
 			this.clearCtx(this.tempCtx);
 			this.tempCtx.beginPath();
 			this.tempCtx.setLineDash([5]);
-			this.tempCtx.rect(Math.min(this.startPos.x, endPos.x), Math.min(this.startPos.y, endPos.y), Math.abs(this.startPos.x - endPos.x), Math.abs(this.startPos.y - endPos.y));
+
+			const rect = Tools.makeRect(this.startPos, new Point(e.x, e.y));
+			rect.x -= this.owner.canvasPos.x;
+			rect.y -= this.owner.canvasPos.y;
+			this.tempCtx.rect(rect.x, rect.y, rect.width, rect.height);
 			this.tempCtx.closePath();
 			this.tempCtx.stroke();
 		}
@@ -68,11 +79,44 @@ class MultiSelectMode extends AbstractMode {
 	onMouseDown(e: MouseEvent): void {
 		if (this.mode === null) {
 			this.mode = MSModeMode.select;
-			this.startPos = new Point(e.x, e.y).sub(this.owner.canvasPos)/*.add(new Point(0.5, 0.5))*/;
+			this.startPos = new Point(e.x, e.y);
 		}
 	}
 	onMouseUp(e: MouseEvent): void {
 		if (this.mode = MSModeMode.select) {
+			const points = this.owner.pointsInRect(Tools.makeRect(this.startPos, new Point(e.x, e.y)));
+
+			if (e.shiftKey) { //if shift was pressed, add points
+				for (const point of points) {
+					if (!this.selection.has(point.id)) {
+						this.selection.set(point.id, point);
+						point.select();
+					}
+				}
+			} else if (e.ctrlKey) { //if ctrl was pressed, remove points
+				window.requestAnimationFrame(() => { //use reuqest animation frame, otherwise attribute removal won't work
+					for (const point of points) {
+						if (this.selection.has(point.id)) {
+							this.selection.delete(point.id);
+							point.deselect();
+						}
+					}
+				});
+			} else { //otherwise, overwrite points map
+				for (const point of this.selection.values()) {
+					point.deselect();
+				}
+
+				this.selection.clear();
+				for (const point of points) {
+					this.selection.set(point.id, point);
+					point.select();
+				}
+			}
+
+			for (const point of points) {
+				point.select();
+			}
 			this.clearCtx(this.tempCtx);
 		}
 		this.mode = null;

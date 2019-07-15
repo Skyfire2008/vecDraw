@@ -58,9 +58,9 @@
 		}
 	}
 
-	.selection {
+	.selection .outerCircle {
 		animation-name: circle;
-		animation-duration: 1s;
+		animation-duration: 0.5s;
 		animation-iteration-count: infinite;
 	}
 </style>
@@ -74,7 +74,7 @@
 	<textarea rows="5" columns="400" id="jsonArea"></textarea>
 	<div id="pointHolder"></div>
 	<svg id="pointTemplate" width="10" height="10">
-		<circle cx="5" cy="5" r="4" fill="black" stroke="white" stroke-width="1"></circle>
+		<circle class="outerCircle" cx="5" cy="5" r="4" fill="black" stroke="white" stroke-width="1"></circle>
 		<circle class="innerCircle" cx="5" cy="5" r="2" fill="white"></circle>
 	</svg>
 	<br />

@@ -192,6 +192,23 @@ class VecDraw {
 		}
 	}
 
+	public pointsInRect(rect: DOMRect): Array<ModelPoint> {
+		let result: Array<ModelPoint> = [];
+		rect.x -= ModelPoint.radius;
+		rect.y -= ModelPoint.radius;
+		rect.width += 2 * ModelPoint.radius;
+		rect.height += 2 * ModelPoint.radius;
+
+		for (const point of this.points.values()) {
+			const globalPos = point.globalPos;
+			if (globalPos.x > rect.x && globalPos.x <= rect.right && globalPos.y > rect.y && globalPos.y <= rect.bottom) {
+				result.push(point);
+			}
+		}
+
+		return result;
+	}
+
 	public pointAt(x: number, y: number): ModelPoint {
 		let result: ModelPoint = null;
 		const globalPos = new Point(x, y);

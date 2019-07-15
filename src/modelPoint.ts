@@ -27,6 +27,15 @@ class ModelPoint {
 		return dx * dx + dy * dy < ModelPoint.radius2;
 	}*/
 
+	public select() {
+		this.elem.setAttribute("class", "selection");
+	}
+
+	public deselect() {
+		this.elem.removeAttribute("class");
+		console.log(this.elem.attributes);
+	}
+
 	public connectTo(other: ModelPoint) {
 		if (other.id !== this.id) {
 			this.connections.add(other.id);
