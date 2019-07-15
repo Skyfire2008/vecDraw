@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	modes.set("b", new AddConnectedPointMode(vecDraw, tempCtx, mainRect.left, mainRect.top));
 	modes.set("d", new DeleteMode(vecDraw));
 	modes.set("s", new SelectMode(vecDraw, document, xInput, yInput, colorPicker));
+	modes.set("r", new MultiSelectMode(vecDraw, tempCtx));
 	currentMode = new DummyMode();
 });
 
