@@ -33,20 +33,94 @@ enum MSModeMode {
 class MultiSelectMode extends AbstractMode {
 
 	private tempCtx: CanvasRenderingContext2D;
+	private xInput: HTMLInputElement;
+	private yInput: HTMLInputElement;
+	private colorPicker: HTMLInputElement;
+
 	private mode: MSModeMode;
-
 	private startPos: Point;
-
 	private selection: Map<number, ModelPoint>;
+	private selectionPos: Point;
 
-	constructor(vecDraw: VecDraw, tempCtx: CanvasRenderingContext2D) {
+	private redraw() {
+		let needRedraw = false;
+
+		for (const point of this.selection.values()) {
+			point.resetElemPos();
+			if (!needRedraw && point.hasConnections()) {
+				needRedraw = true;
+			}
+		}
+
+		if (needRedraw) {
+			this.owner.redrawLines();
+		}
+	}
+
+	private calcSelectionPos() {
+		this.selectionPos = new Point(0, 0);
+		for (const point of this.selection.values()) {
+			this.selectionPos = this.selectionPos.add(point.pos);
+		}
+		if (this.selection.size > 0) {
+			this.selectionPos = this.selectionPos.mult(1 / this.selection.size);
+		}
+	}
+
+	private resetInputs() {
+		this.xInput.value = "" + this.selectionPos.x;
+		this.yInput.value = "" + this.selectionPos.y;
+	}
+
+	constructor(vecDraw: VecDraw, tempCtx: CanvasRenderingContext2D, xInput: HTMLInputElement, yInput: HTMLInputElement, colorPicker: HTMLInputElement) {
 		super(vecDraw);
 		this.tempCtx = tempCtx;
+		this.xInput = xInput;
+		this.yInput = yInput;
+		this.colorPicker = colorPicker;
+
 		this.mode = null;
-
 		this.startPos = null;
-
 		this.selection = new Map<number, ModelPoint>();
+		this.selectionPos = null;
+
+		xInput.addEventListener("input", (e: Event) => {
+			if (this.selection.size !== 0) {
+				const newX = parseFloat(this.xInput.value);
+				if (!isNaN(newX) && newX !== this.selectionPos.x) {
+					for (const point of this.selection.values()) {
+						point.x += newX - this.selectionPos.x;
+					}
+					this.selectionPos.x = newX;
+					this.redraw();
+				}
+			}
+		});
+
+		yInput.addEventListener("input", (e: Event) => {
+			if (this.selection.size !== 0) {
+				const newY = parseFloat(this.yInput.value);
+				if (!isNaN(newY) && newY !== this.selectionPos.y) {
+					for (const point of this.selection.values()) {
+						point.y += newY - this.selectionPos.y;
+					}
+					this.selectionPos.y = newY;
+					this.redraw();
+				}
+			}
+		});
+
+		colorPicker.addEventListener("change", (e: Event) => {
+			if (this.selection.size !== 0) {
+				for (const point of this.selection.values()) {
+					point.color = (<HTMLInputElement>e.target).value;
+				}
+				this.redraw();
+			} else {
+				//FIXME: setting listener for current color shouldn't be this class'es responsibility
+				this.owner.setCurrentColor((<HTMLInputElement>e.target).value);
+			}
+		});
 	}
 
 	onEnable(): void {
@@ -94,6 +168,10 @@ class MultiSelectMode extends AbstractMode {
 						point.select();
 					}
 				}
+
+				this.calcSelectionPos();
+				this.resetInputs();
+
 			} else if (e.ctrlKey) { //if ctrl was pressed, remove points
 				window.requestAnimationFrame(() => { //use reuqest animation frame, otherwise attribute removal won't work
 					for (const point of points) {
@@ -102,6 +180,9 @@ class MultiSelectMode extends AbstractMode {
 							point.deselect();
 						}
 					}
+
+					this.calcSelectionPos();
+					this.resetInputs();
 				});
 			} else { //otherwise, overwrite points map
 				window.requestAnimationFrame(() => {
@@ -114,6 +195,9 @@ class MultiSelectMode extends AbstractMode {
 						this.selection.set(point.id, point);
 						point.select();
 					}
+
+					this.calcSelectionPos();
+					this.resetInputs();
 				});
 			}
 
@@ -131,13 +215,10 @@ class SelectMode extends AbstractMode {
 	private xInput: HTMLInputElement;
 	private yInput: HTMLInputElement;
 	private colorPicker: HTMLInputElement;
-	private doc: Document;
-
 	private selection: ModelPoint = null;
 
-	constructor(vecDraw: VecDraw, doc: Document, xInput: HTMLInputElement, yInput: HTMLInputElement, colorPicker: HTMLInputElement) {
+	constructor(vecDraw: VecDraw, xInput: HTMLInputElement, yInput: HTMLInputElement, colorPicker: HTMLInputElement) {
 		super(vecDraw);
-		this.doc = doc;
 		this.xInput = xInput;
 		this.yInput = yInput;
 		this.colorPicker = colorPicker;
@@ -205,11 +286,11 @@ class SelectMode extends AbstractMode {
 	}
 
 	onEnable(): void {
-		this.doc.addEventListener("keydown", this.onKeyDown);
+		document.addEventListener("keydown", this.onKeyDown);
 	}
 	onDisable(): void {
 		this.selection = null;
-		this.doc.removeEventListener("keydown", this.onKeyDown);
+		document.removeEventListener("keydown", this.onKeyDown);
 		this.colorPicker.setAttribute("value", this.owner.getCurrentColor());
 		this.colorPicker.value = this.colorPicker.defaultValue;
 	}

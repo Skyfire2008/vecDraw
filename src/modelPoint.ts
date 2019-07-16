@@ -33,7 +33,6 @@ class ModelPoint {
 
 	public deselect() {
 		this.elem.removeAttribute("class");
-		console.log(this.elem.attributes);
 	}
 
 	public connectTo(other: ModelPoint) {
