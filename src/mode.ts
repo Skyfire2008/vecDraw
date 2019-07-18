@@ -89,7 +89,17 @@ class MultiSelectMode extends AbstractMode {
 					deltaPos.y = 1 / this.owner.gridHeight;
 					break;
 				case "Delete":
-					//TODO: implement me!
+					let needRedraw = false;
+					for (const point of this.selection.values()) {
+						if (!needRedraw && point.hasConnections()) {
+							needRedraw = true;
+						}
+						this.owner.removePoint(point.id);
+					}
+
+					if (needRedraw) {
+						this.owner.redrawLines();
+					}
 					break;
 			}
 

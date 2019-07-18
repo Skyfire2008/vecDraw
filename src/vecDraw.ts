@@ -100,7 +100,7 @@ class VecDraw {
 		this.gridCtx.stroke();
 
 		this.gridCtx.lineWidth = 2;
-		this.gridCtx.strokeStyle = "#ffff00";
+		this.gridCtx.strokeStyle = "#9f7265";
 		this.gridCtx.beginPath();
 
 		let foo = this.center.x * this.gridWidth;
@@ -159,7 +159,7 @@ class VecDraw {
 
 	}
 
-	public removePoint(pointId: number) {
+	public removePoint(pointId: number, redraw: boolean = true) {
 		const point = this.points.get(pointId);
 		let pointHadConnections = false;
 		if (point !== undefined) {
@@ -172,7 +172,7 @@ class VecDraw {
 
 		this.points.delete(point.id);
 		point.elem.remove();
-		if (pointHadConnections) {
+		if (pointHadConnections && redraw) {
 			this.redrawLines();
 		}
 	}
