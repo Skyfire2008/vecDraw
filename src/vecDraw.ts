@@ -77,7 +77,7 @@ class VecDraw {
 
 	public redrawGrid() {
 		this.gridCtx.clearRect(0, 0, this.canvasSize.x, this.canvasSize.y);
-		this.gridCtx.strokeStyle = "#ff8800";
+		this.gridCtx.strokeStyle = "#7f5245";
 
 		let x = 0;
 		this.gridCtx.beginPath();

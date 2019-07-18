@@ -72,6 +72,39 @@ class MultiSelectMode extends AbstractMode {
 		this.yInput.value = "" + this.selectionPos.y;
 	}
 
+	private onKeyDown = (e: KeyboardEvent) => {
+		if (this.selection.size > 0) {
+			let deltaPos = new Point(0, 0);
+			switch (e.key) {
+				case "ArrowLeft": //left
+					deltaPos.x = -1 / this.owner.gridWidth;
+					break;
+				case "ArrowUp": //up
+					deltaPos.y = -1 / this.owner.gridHeight;
+					break;
+				case "ArrowRight": //right
+					deltaPos.x = 1 / this.owner.gridWidth;
+					break;
+				case "ArrowDown": //down
+					deltaPos.y = 1 / this.owner.gridHeight;
+					break;
+				case "Delete":
+					//TODO: implement me!
+					break;
+			}
+
+			if (deltaPos.x !== 0 || deltaPos.y !== 0) {
+				for (const point of this.selection.values()) {
+					point.pos = point.pos.add(deltaPos);
+				}
+
+				this.selectionPos = this.selectionPos.add(deltaPos);
+				this.resetInputs();
+				this.redraw();
+			}
+		}
+	}
+
 	constructor(vecDraw: VecDraw, tempCtx: CanvasRenderingContext2D, xInput: HTMLInputElement, yInput: HTMLInputElement, colorPicker: HTMLInputElement) {
 		super(vecDraw);
 		this.tempCtx = tempCtx;
@@ -126,15 +159,18 @@ class MultiSelectMode extends AbstractMode {
 	onEnable(): void {
 		//this.tempCtx.lineWidth = 1;
 		this.tempCtx.strokeStyle = "white";
+		document.addEventListener("keydown", this.onKeyDown)
 	}
+
 	onDisable(): void {
 		this.mode = null;
 		this.clearCtx(this.tempCtx);
+		this.tempCtx.setLineDash([]);
 		for (const point of this.selection.values()) {
 			point.deselect();
 		}
 		this.selection.clear();
-		//this.tempCtx.lineWidth = 2;
+		document.removeEventListener("keydown", this.onKeyDown);
 	}
 	onMouseMove(e: MouseEvent): void {
 

@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	const yInput = <HTMLInputElement>document.getElementById("yInput");
 	const colorPicker = <HTMLInputElement>document.getElementById("colorPicker");
 
-	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCtx, gridCanvas.getContext("2d"), new Point(mainRect.width, mainRect.height), new Point(mainRect.left, mainRect.top), new Point(10, 10));
+	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCtx, gridCanvas.getContext("2d"), new Point(mainRect.width, mainRect.height), new Point(mainRect.left, mainRect.top), new Point(16, 16));
 	vecDraw.redrawGrid();
 
 	//export model
