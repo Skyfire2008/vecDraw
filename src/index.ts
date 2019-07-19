@@ -37,6 +37,23 @@ document.addEventListener("DOMContentLoaded", () => {
 		jsonArea.value = vecDraw.toString();
 	});
 
+	//import model
+	const importBtn = document.getElementById("importBtn");
+	importBtn.addEventListener("click", function () {
+		vecDraw.import(JSON.parse(jsonArea.value));
+	})
+
+	//toggle points
+	const toggleBtn = document.getElementById("togglePointsBtn");
+	toggleBtn.addEventListener("click", function () {
+		const pointHolder = document.getElementById("pointHolder");
+		if (pointHolder.style.visibility === "hidden") {
+			pointHolder.style.visibility = "visible";
+		} else {
+			pointHolder.style.visibility = "hidden";
+		}
+	});
+
 	modes = new Map();
 	modes.set("a", new AddPointMode(vecDraw));
 	modes.set("m", new MovePointMode(vecDraw));

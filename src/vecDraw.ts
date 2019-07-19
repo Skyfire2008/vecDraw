@@ -1,3 +1,8 @@
+interface jsonData {
+	points: Array<{ x: number, y: number, color: string }>;
+	lines: Array<{ from: number, to: number }>;
+}
+
 class VecDraw {
 	public templatePoint: ModelPoint;
 	private pointHolder: HTMLElement;
@@ -28,6 +33,29 @@ class VecDraw {
 
 		this.center = new Point(Math.round(canvasSize.x / (2 * this.gridWidth)), Math.round(canvasSize.y / (2 * this.gridHeight)));
 		this.templatePoint = new ModelPoint(0, 0, this, this.currentColor, pointTemplateElem);
+	}
+
+	public import(data: jsonData) {
+		this.pointHolder.innerHTML = "";
+		this.points.clear();
+		this.lines.clear();
+
+		const idMap = new Map<Number, number>();
+
+		let i = 0;
+		for (const point of data.points) {
+			this.templatePoint.pos = new Point(point.x, point.y);
+			this.setCurrentColor(point.color);
+			const newPoint = this.addPoint();
+			idMap.set(i, newPoint.id);
+			i++;
+		}
+
+		for (const line of data.lines) {
+			this.addLine(idMap.get(line.from), idMap.get(line.to));
+		}
+
+		this.redrawLines();
 	}
 
 	public toString(): string {
