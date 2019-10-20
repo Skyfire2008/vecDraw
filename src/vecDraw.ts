@@ -14,6 +14,8 @@ class VecDraw {
 	public readonly canvasPos: Point;
 	public readonly canvasSize: Point;
 
+	public scale: number;
+
 	private points: Map<number, ModelPoint>;
 	private lines: Map<string, ModelLine>;
 	private currentColor: string;
@@ -66,7 +68,7 @@ class VecDraw {
 
 		let i = 0;
 		for (const entry of this.points) {
-			pointStr += `    {"x": ${entry[1].x}, "y": ${entry[1].y}, "color": "${entry[1].color}"},\n`;
+			pointStr += `    {"x": ${entry[1].x * this.scale}, "y": ${entry[1].y * this.scale}, "color": "${entry[1].color}"},\n`;
 			pointMap.set(entry[0], i);
 			i++;
 		}

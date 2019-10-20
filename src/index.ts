@@ -27,6 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	const yInput = <HTMLInputElement>document.getElementById("yInput");
 	const colorPicker = <HTMLInputElement>document.getElementById("colorPicker");
 
+	const scaleInput = <HTMLInputElement>document.getElementById("scaleInput");
+	scaleInput.value = "1";
+
 	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCtx, gridCanvas.getContext("2d"), new Point(mainRect.width, mainRect.height), new Point(mainRect.left, mainRect.top), new Point(16, 16));
 	vecDraw.redrawGrid();
 
@@ -40,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	//import model
 	const importBtn = document.getElementById("importBtn");
 	importBtn.addEventListener("click", function () {
+		vecDraw.scale = scaleInput.valueAsNumber;
 		vecDraw.import(JSON.parse(jsonArea.value));
 	})
 
