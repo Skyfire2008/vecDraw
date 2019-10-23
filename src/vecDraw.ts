@@ -14,7 +14,7 @@ class VecDraw {
 	public readonly canvasPos: Point;
 	public readonly canvasSize: Point;
 
-	public scale: number;
+	public scale: number = 1;
 
 	private points: Map<number, ModelPoint>;
 	private lines: Map<string, ModelLine>;
