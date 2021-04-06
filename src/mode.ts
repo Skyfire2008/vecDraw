@@ -401,14 +401,18 @@ class AddConnectedPointMode extends AbstractMode {
 	private tempCtx: CanvasRenderingContext2D;
 	private canvasLeft: number;
 	private canvasTop: number;
+	private xInput: HTMLInputElement;
+	private yInput: HTMLInputElement;
 
-	constructor(vecDraw: VecDraw, tempCtx: CanvasRenderingContext2D, canvasLeft: number, canvasTop: number) {
+	constructor(vecDraw: VecDraw, tempCtx: CanvasRenderingContext2D, canvasLeft: number, canvasTop: number, xInput: HTMLInputElement, yInput: HTMLInputElement) {
 		super(vecDraw);
 		this.prevPoint = null;
 		this.nextPoint = null;
 		this.tempCtx = tempCtx;
 		this.canvasLeft = canvasLeft;
 		this.canvasTop = canvasTop;
+		this.xInput = xInput;
+		this.yInput = yInput;
 	}
 
 	onEnable(): void { }
@@ -422,6 +426,8 @@ class AddConnectedPointMode extends AbstractMode {
 
 		if (this.nextPoint === null) {
 			this.owner.moveTemplatePoint(e.x, e.y);
+			this.xInput.value = "" + this.owner.templatePoint.x;
+			this.yInput.value = "" + this.owner.templatePoint.y;
 		}
 
 		if (this.prevPoint !== null) {
@@ -544,10 +550,14 @@ class DummyMode implements Mode {
 class MovePointMode extends AbstractMode {
 
 	private point: ModelPoint;
+	private xInput: HTMLInputElement;
+	private yInput: HTMLInputElement;
 
-	constructor(vecDraw: VecDraw) {
+	constructor(vecDraw: VecDraw, xInput: HTMLInputElement, yInput: HTMLInputElement) {
 		super(vecDraw);
 		this.point = null;
+		this.xInput = xInput;
+		this.yInput = yInput;
 	}
 
 	onMouseDown(e: MouseEvent): void {
@@ -564,6 +574,9 @@ class MovePointMode extends AbstractMode {
 				this.owner.redrawLines();
 			}
 			//this.owner.movePoint(this.pointId, e.x, e.y);
+
+			this.xInput.value = "" + this.point.x
+			this.yInput.value = "" + this.point.y;
 		}
 	}
 	onMouseUp(e: MouseEvent): void {
@@ -576,8 +589,13 @@ class MovePointMode extends AbstractMode {
 
 class AddPointMode extends AbstractMode {
 
-	constructor(vecDraw: VecDraw) {
+	private xInput: HTMLInputElement;
+	private yInput: HTMLInputElement;
+
+	constructor(vecDraw: VecDraw, xInput: HTMLInputElement, yInput: HTMLInputElement) {
 		super(vecDraw);
+		this.xInput = xInput;
+		this.yInput = yInput;
 	}
 
 	onEnable(): void { }
@@ -588,6 +606,8 @@ class AddPointMode extends AbstractMode {
 
 	onMouseMove(e: MouseEvent): void {
 		this.owner.moveTemplatePoint(e.x, e.y);
+		this.xInput.value = "" + this.owner.templatePoint.x;
+		this.yInput.value = "" + this.owner.templatePoint.y;
 	}
 
 	onMouseUp(e: MouseEvent): void {

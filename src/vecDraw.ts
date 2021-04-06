@@ -8,6 +8,7 @@ class VecDraw {
 	private pointHolder: HTMLElement;
 	private mainCtx: CanvasRenderingContext2D;
 	private gridCtx: CanvasRenderingContext2D;
+	private previewCtx: CanvasRenderingContext2D;
 	public gridWidth: number;
 	public gridHeight: number;
 	public center: Point;
@@ -20,7 +21,7 @@ class VecDraw {
 	private lines: Map<string, ModelLine>;
 	private currentColor: string;
 
-	constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement, mainCtx: CanvasRenderingContext2D, gridCtx: CanvasRenderingContext2D, canvasSize: Point, canvasPos: Point, gridSize: Point) {
+	constructor(pointTemplateElem: HTMLElement, pointHolder: HTMLElement, mainCtx: CanvasRenderingContext2D, gridCtx: CanvasRenderingContext2D, previewCtx: CanvasRenderingContext2D, canvasSize: Point, canvasPos: Point, gridSize: Point) {
 		this.points = new Map();
 		this.lines = new Map();
 		this.currentColor = "#ffffff";
@@ -29,6 +30,7 @@ class VecDraw {
 		this.canvasSize = canvasSize;
 		this.mainCtx = mainCtx;
 		this.gridCtx = gridCtx;
+		this.previewCtx = previewCtx;
 
 		this.gridWidth = gridSize.x;
 		this.gridHeight = gridSize.y;
@@ -58,6 +60,23 @@ class VecDraw {
 		}
 
 		this.redrawLines();
+	}
+
+	public drawPreview() {
+		this.previewCtx.fillStyle = "black";
+		this.previewCtx.fillRect(0, 0, 80, 80);
+
+		for (const line of this.lines.values()) {
+			const grad = this.previewCtx.createLinearGradient(line.from.x + 40.5, line.from.y + 40.5, line.to.x + 40.5, line.to.y + 40.5);
+			grad.addColorStop(0, line.from.color);
+			grad.addColorStop(1, line.to.color);
+
+			this.previewCtx.strokeStyle = grad;
+			this.previewCtx.beginPath();
+			this.previewCtx.moveTo(line.from.x + 40.5, line.from.y + 40.5);
+			this.previewCtx.lineTo(line.to.x + 40.5, line.to.y + 40.5);
+			this.previewCtx.stroke();
+		}
 	}
 
 	public toString(): string {
@@ -162,6 +181,8 @@ class VecDraw {
 		for (const line of this.lines.values()) {
 			this.drawLine(this.mainCtx, line.from, line.to);
 		}
+
+		this.drawPreview();
 	}
 
 	public moveTemplatePoint(x: number, y: number) {
@@ -220,6 +241,8 @@ class VecDraw {
 
 			this.drawLine(this.mainCtx, to, from);
 		}
+
+		this.drawPreview();
 	}
 
 	public pointsInRect(rect: DOMRect): Array<ModelPoint> {

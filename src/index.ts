@@ -20,6 +20,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	tempCtx.lineWidth = 2;
 	tempCtx.strokeStyle = "white";
 
+	const previewCanvas = <HTMLCanvasElement>document.getElementById("previewCanvas");
+	const previewCtx = previewCanvas.getContext("2d");
+
 	const gridCanvas = <HTMLCanvasElement>document.getElementById("gridCanvas");
 	gridCanvas.setAttribute("style", `left: ${mainRect.left}px; top: ${mainRect.top}px`);
 
@@ -27,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	const yInput = <HTMLInputElement>document.getElementById("yInput");
 	const colorPicker = <HTMLInputElement>document.getElementById("colorPicker");
 
-	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCtx, gridCanvas.getContext("2d"), new Point(mainRect.width, mainRect.height), new Point(mainRect.left, mainRect.top), new Point(16, 16));
+	vecDraw = new VecDraw(pointTemplate, pointHolder, mainCtx, gridCanvas.getContext("2d"), previewCtx, new Point(mainRect.width, mainRect.height), new Point(mainRect.left, mainRect.top), new Point(10, 10));
 	vecDraw.redrawGrid();
 
 	//export model
@@ -64,10 +67,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 	modes = new Map();
-	modes.set("a", new AddPointMode(vecDraw));
-	modes.set("m", new MovePointMode(vecDraw));
+	modes.set("a", new AddPointMode(vecDraw, xInput, yInput));
+	modes.set("m", new MovePointMode(vecDraw, xInput, yInput));
 	modes.set("l", new ConnectPointsMode(vecDraw, tempCtx, mainRect.left, mainRect.top));
-	modes.set("b", new AddConnectedPointMode(vecDraw, tempCtx, mainRect.left, mainRect.top));
+	modes.set("b", new AddConnectedPointMode(vecDraw, tempCtx, mainRect.left, mainRect.top, xInput, yInput));
 	modes.set("d", new DeleteMode(vecDraw));
 	modes.set("s", new SelectMode(vecDraw, xInput, yInput, colorPicker));
 	modes.set("r", new MultiSelectMode(vecDraw, tempCtx, xInput, yInput, colorPicker));
